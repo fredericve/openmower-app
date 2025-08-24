@@ -2,6 +2,7 @@
 
 import type {MowerConfig} from '@/components/types';
 import {useConfig} from '@/contexts/ConfigContext';
+import {useSelectedMower} from '@/contexts/SelectedMowerContext';
 import {Box, Drawer, List, SxProps, Theme, useTheme} from '@mui/material';
 import {usePathname, useRouter} from 'next/navigation';
 import {useState} from 'react';
@@ -22,7 +23,7 @@ export default function Sidebar({open, onClose}: SidebarProps) {
   const pathname = usePathname();
   const [mowerMenuAnchor, setMowerMenuAnchor] = useState<null | HTMLElement>(null);
   const {mowers} = useConfig();
-  const [selectedMower, setSelectedMower] = useState<MowerConfig | undefined>(mowers[0]);
+  const {selectedMower, setSelectedMower} = useSelectedMower();
   const navigationItems = createNavigationItems();
 
   const handleMowerMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -113,7 +114,9 @@ export default function Sidebar({open, onClose}: SidebarProps) {
             ))}
           </List>
         </Box>
-        {mowers.length > 1 && <SelectedMower selectedMower={selectedMower!} onMowerMenuOpen={handleMowerMenuOpen} />}
+        {mowers.length > 1 && selectedMower && (
+          <SelectedMower selectedMower={selectedMower} onMowerMenuOpen={handleMowerMenuOpen} />
+        )}
       </Box>
     );
   }
