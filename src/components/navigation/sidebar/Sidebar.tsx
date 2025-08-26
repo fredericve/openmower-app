@@ -1,8 +1,8 @@
 'use client';
 
 import type {MowerConfig} from '@/components/types';
-import {useConfig} from '@/contexts/ConfigContext';
 import {useSelectedMower} from '@/contexts/SelectedMowerContext';
+import {useMowers} from '@/stores/configStore';
 import {Box, Drawer, List, SxProps, Theme, useTheme} from '@mui/material';
 import {usePathname, useRouter} from 'next/navigation';
 import {useState} from 'react';
@@ -22,7 +22,7 @@ export default function Sidebar({open, onClose}: SidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [mowerMenuAnchor, setMowerMenuAnchor] = useState<null | HTMLElement>(null);
-  const {mowers} = useConfig();
+  const mowers = useMowers();
   const {selectedMower, setSelectedMower} = useSelectedMower();
   const navigationItems = createNavigationItems();
 

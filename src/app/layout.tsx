@@ -1,4 +1,3 @@
-import {ConfigProvider} from '@/contexts/ConfigContext';
 import {SelectedMowerProvider} from '@/contexts/SelectedMowerContext';
 import {loadAppConfig} from '@/lib/actions';
 import {Box} from '@mui/material';
@@ -6,6 +5,7 @@ import {AppRouterCacheProvider} from '@mui/material-nextjs/v15-appRouter';
 import {ThemeProvider} from '@mui/material/styles';
 import type {Metadata} from 'next';
 import {Roboto} from 'next/font/google';
+import {ConfigInitializer} from '../components/ConfigInitializer';
 import Navigation from '../components/navigation/Navigation';
 import theme from '../theme';
 import './globals.css';
@@ -31,28 +31,27 @@ export default async function RootLayout({
   return (
     <html lang="en" className={roboto.variable}>
       <body>
+        <ConfigInitializer config={config} />
         <ThemeProvider theme={theme}>
           <AppRouterCacheProvider>
-            <ConfigProvider config={config}>
-              <SelectedMowerProvider>
-                <Box sx={{display: 'flex', height: '100vh'}}>
-                  <Navigation />
-                  <Box
-                    component="main"
-                    sx={{
-                      flex: 1,
-                      pb: {xs: 7, md: 0}, // Account for mobile bottom navigation
-                      margin: 0,
-                      padding: 0,
-                      width: '100%',
-                      overflow: 'auto',
-                    }}
-                  >
-                    {children}
-                  </Box>
+            <SelectedMowerProvider>
+              <Box sx={{display: 'flex', height: '100vh'}}>
+                <Navigation />
+                <Box
+                  component="main"
+                  sx={{
+                    flex: 1,
+                    pb: {xs: 7, md: 0}, // Account for mobile bottom navigation
+                    margin: 0,
+                    padding: 0,
+                    width: '100%',
+                    overflow: 'auto',
+                  }}
+                >
+                  {children}
                 </Box>
-              </SelectedMowerProvider>
-            </ConfigProvider>
+              </Box>
+            </SelectedMowerProvider>
           </AppRouterCacheProvider>
         </ThemeProvider>
       </body>

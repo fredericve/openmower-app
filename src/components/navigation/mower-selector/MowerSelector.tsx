@@ -1,7 +1,7 @@
 'use client';
 
 import type {MowerConfig} from '@/components/types';
-import {useConfig} from '@/contexts/ConfigContext';
+import {useMowers} from '@/stores/configStore';
 import {Menu} from '@mui/material';
 import MowerSelectorHeader from './MowerSelectorHeader';
 import MowerSelectorItem from './MowerSelectorItem';
@@ -13,7 +13,7 @@ interface MowerSelectorProps {
 }
 
 export default function MowerSelector({onMowerSelect, anchorEl, onClose}: MowerSelectorProps) {
-  const {mowers} = useConfig();
+  const mowers = useMowers();
   return (
     <Menu
       anchorEl={anchorEl}

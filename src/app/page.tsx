@@ -1,7 +1,7 @@
 'use client';
 
 import {HeaderStat, Page, PageContent, PageHeader} from '@/components/page';
-import {useConfig} from '@/contexts/ConfigContext';
+import {useMowers} from '@/stores/configStore';
 import {
   Battery90 as BatteryIcon,
   CheckCircle as CheckIcon,
@@ -44,7 +44,7 @@ const mockStatusData = {
 
 export default function Dashboard() {
   const theme = useTheme();
-  const {mowers} = useConfig();
+  const mowers = useMowers();
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleAction = async (action: string, mowerId: string) => {
