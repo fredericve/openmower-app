@@ -1,7 +1,7 @@
 'use client';
 
 import {HeaderStat, Page, PageContent, PageHeader} from '@/components/page';
-import {useMowers} from '@/stores/configStore';
+import {useMowers} from '@/stores/mowersStore';
 import {
   Battery90 as BatteryIcon,
   CheckCircle as CheckIcon,
@@ -97,6 +97,8 @@ export default function Dashboard() {
     return {
       ...mower,
       ...statusData,
+      battery: mower.state.battery_percentage,
+      operation: mower.state.current_state,
     };
   });
 
