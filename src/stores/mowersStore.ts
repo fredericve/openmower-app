@@ -55,7 +55,7 @@ export const useMowersStore = create<MowersStore>()(
         }
 
         client.on('error', (error) => {
-          console.error('MQTT error', error.message);
+          // console.error('MQTT error', error.message);
         });
 
         client.on('connect', () => {

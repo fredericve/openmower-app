@@ -45,6 +45,7 @@ const areaSchema = z.object({
   obstacles: z.array(polygonSchema).nullable(),
   outline: polygonSchema,
 });
+export type Area = z.infer<typeof areaSchema>;
 
 export const mapSchema = z.object({
   datum: z

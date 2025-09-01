@@ -1,79 +1,32 @@
-/**
- * Coordinate conversion utilities for UTM to lat/lng
- *
- * Since the mower system uses UTM coordinates relative to a GPS datum,
- * we need to convert these to lat/lng for display on MapLibre GL maps.
- */
+import * as utm from 'utm';
 
-export interface Point {
-  x: number;
-  y: number;
+export type RelativePoint = {x: number; y: number};
+export type AbsolutePoint = [longitude: number, latitude: number];
+export type UtmPoint = ReturnType<typeof utm.fromLatLon>;
+
+export function datumToRelative(absolute: AbsolutePoint): UtmPoint {
+  return utm.fromLatLon(absolute[1], absolute[0]);
 }
 
-export interface LatLngPoint {
-  lat: number;
-  lng: number;
+export function pointToAbsolute(point: RelativePoint, datum: UtmPoint): AbsolutePoint {
+  const {latitude, longitude} = utm.toLatLon(
+    datum.easting + point.x,
+    datum.northing + point.y,
+    datum.zoneNum,
+    datum.zoneLetter,
+  );
+  return [longitude, latitude];
 }
 
-export interface UTMDatum {
-  lat: number;
-  long: number;
-  height: number;
+export function pointToRelative(point: AbsolutePoint, datum: UtmPoint): RelativePoint {
+  const utmPoint = utm.fromLatLon(point[1], point[0], datum.zoneNum);
+  return {x: utmPoint.easting - datum.easting, y: utmPoint.northing - datum.northing};
 }
 
-/**
- * Simple approximation for converting UTM offsets to lat/lng
- * This is a simplified conversion that assumes:
- * - Small distances (< 1km) from the datum
- * - Relatively flat terrain
- * - UTM coordinates are in meters
- *
- * For more precise conversions, a full UTM projection library would be needed.
- */
-export function utmToLatLng(utmPoint: Point, datum: UTMDatum): LatLngPoint {
-  // Approximate conversion factors (meters to degrees)
-  // These are rough approximations and vary by latitude
-  const metersPerDegreeLat = 111320; // roughly constant
-  const metersPerDegreeLng = 111320 * Math.cos((datum.lat * Math.PI) / 180); // varies by latitude
-
-  const lat = datum.lat + utmPoint.y / metersPerDegreeLat;
-  const lng = datum.long + utmPoint.x / metersPerDegreeLng;
-
-  return {lat, lng};
+export function pointsToAbsolute(points: RelativePoint[], datum: UtmPoint): AbsolutePoint[] {
+  return points.map((point) => pointToAbsolute(point, datum));
 }
 
-/**
- * Convert a polygon of UTM points to lat/lng
- */
-export function utmPolygonToLatLng(utmPolygon: Point[], datum: UTMDatum): LatLngPoint[] {
-  return utmPolygon.map((point) => utmToLatLng(point, datum));
-}
-
-/**
- * Calculate the bounds of UTM coordinates and convert to lat/lng bounds
- */
-export function getMapBounds(
-  points: Point[],
-  datum: UTMDatum,
-): {
-  southwest: LatLngPoint;
-  northeast: LatLngPoint;
-} {
-  if (points.length === 0) {
-    const center = utmToLatLng({x: 0, y: 0}, datum);
-    return {
-      southwest: {lat: center.lat - 0.001, lng: center.lng - 0.001},
-      northeast: {lat: center.lat + 0.001, lng: center.lng + 0.001},
-    };
-  }
-
-  const minX = Math.min(...points.map((p) => p.x));
-  const maxX = Math.max(...points.map((p) => p.x));
-  const minY = Math.min(...points.map((p) => p.y));
-  const maxY = Math.max(...points.map((p) => p.y));
-
-  const southwest = utmToLatLng({x: minX, y: minY}, datum);
-  const northeast = utmToLatLng({x: maxX, y: maxY}, datum);
-
-  return {southwest, northeast};
+export function pointsToRelative(points: AbsolutePoint[], datum: UtmPoint): RelativePoint[] {
+  return points.map((point) => pointToRelative(point, datum));
 }
