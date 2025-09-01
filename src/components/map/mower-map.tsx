@@ -2,21 +2,19 @@
 
 import type {MapData, State} from '@/stores/schemas';
 import {mapToFeatures} from '@/utils/area-converter';
-import MapboxDraw, {type MapboxDrawOptions} from '@mapbox/mapbox-gl-draw';
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
-import {CenterFocusStrong as FitBoundsIcon, Layers as LayersIcon} from '@mui/icons-material';
 import {Box, useTheme} from '@mui/material';
 import bbox from '@turf/bbox';
-import type {ControlPosition} from 'maplibre-gl';
 import {Map} from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import {RFullscreenControl, RMap, RSource, useControl, useMap, useRControl} from 'maplibre-react-components';
-import {useCallback, useMemo, useRef, useState} from 'react';
-import {createPortal} from 'react-dom';
+import {RFullscreenControl, RMap, RSource} from 'maplibre-react-components';
+import {useMemo, useRef, useState} from 'react';
+import {DrawControl} from './DrawControl';
+import {FitToBoundsControl} from './FitBoundsControl';
 import MapLayers from './MapLayers';
 import {mapStyles} from './mapStyles';
-
-type BBox = [minLng: number, minLat: number, maxLng: number, maxLat: number];
+import {ToggleMapStyleControl} from './ToggleMapStyleControl';
+import type {BBox} from './types';
 
 interface MowerMapProps {
   mapData: MapData;
@@ -25,9 +23,7 @@ interface MowerMapProps {
   height?: string | number;
 }
 
-// Map style configurations
-
-export function MowerMap({mapData, mowerState, width = '100%', height = '400px'}: MowerMapProps) {
+export function MowerMap({mapData, width = '100%', height = '400px'}: MowerMapProps) {
   const theme = useTheme();
   const mapRef = useRef<Map>(null);
 
@@ -53,42 +49,6 @@ export function MowerMap({mapData, mowerState, width = '100%', height = '400px'}
     });
   };
 
-  function FitToBoundsControl({position = 'top-right', bounds}: {position?: ControlPosition; bounds: BBox}) {
-    const {container} = useRControl({position});
-    const map = useMap();
-    const onClick = useCallback(() => {
-      map.fitBounds(bounds, {padding: 10});
-    }, [bounds, map]);
-    return createPortal(
-      <button type="button" aria-hidden="true" onClick={onClick}>
-        <FitBoundsIcon />
-      </button>,
-      container,
-    );
-  }
-
-  function DrawControl({position = 'top-left', ...props}: MapboxDrawOptions & {position?: ControlPosition}) {
-    const constants = MapboxDraw.constants.classes as Record<string, string>;
-    constants.CONTROL_BASE = 'maplibregl-ctrl';
-    constants.CONTROL_PREFIX = 'maplibregl-ctrl-';
-    constants.CONTROL_GROUP = 'maplibregl-ctrl-group';
-    useControl({
-      position,
-      factory: () => new MapboxDraw(props),
-    });
-    return null;
-  }
-
-  function ToggleMapStyleControl({position = 'top-right'}: {position?: ControlPosition}) {
-    const {container} = useRControl({position});
-    return createPortal(
-      <button type="button" aria-hidden="true" onClick={toggleMapStyle}>
-        <LayersIcon />
-      </button>,
-      container,
-    );
-  }
-
   return (
     <Box sx={{width, height, borderRadius: 3, overflow: 'hidden', position: 'relative'}}>
       <RMap
@@ -100,7 +60,7 @@ export function MowerMap({mapData, mowerState, width = '100%', height = '400px'}
       >
         <RFullscreenControl />
         <FitToBoundsControl bounds={bounds} />
-        <ToggleMapStyleControl />
+        <ToggleMapStyleControl onClick={toggleMapStyle} />
         <DrawControl
           position="top-left"
           displayControlsDefault={true}
