@@ -1,6 +1,6 @@
 'use client';
 
-import {MowerMap} from '@/components/map';
+import {MowerMap} from '@/components/map/MowerMap';
 import {HeaderStat, Page, PageContent, PageHeader} from '@/components/page';
 import {useMowers} from '@/stores/mowersStore';
 
@@ -177,7 +177,7 @@ export default function MapPage() {
                 </Box>
 
                 {/* Interactive Map */}
-                <MowerMap mapData={mapData} mowerState={mower.state} height="400px" />
+                <MowerMap mapData={mapData} height="400px" />
 
                 {/* Manual Control Panel */}
                 <Box sx={{mt: 4}}>

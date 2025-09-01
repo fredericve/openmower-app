@@ -3,7 +3,7 @@ import type {ControlPosition} from 'maplibre-gl';
 import {useRControl} from 'maplibre-react-components';
 import {createPortal} from 'react-dom';
 
-export function ToggleMapStyleControl({
+export function ToggleStyleControl({
   position = 'top-right',
   onClick,
 }: {

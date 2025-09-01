@@ -9,7 +9,7 @@ export function FitToBoundsControl({position = 'top-right', bounds}: {position?:
   const {container} = useRControl({position});
   const map = useMap();
   const onClick = useCallback(() => {
-    map.fitBounds(bounds, {padding: 10});
+    map.fitBounds(bounds, {padding: 10, duration: 1000});
   }, [bounds, map]);
   return createPortal(
     <button type="button" aria-hidden="true" onClick={onClick}>
