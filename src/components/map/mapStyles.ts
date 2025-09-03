@@ -8,7 +8,7 @@ export const mapStyles = {
         id: 'background',
         type: 'background' as const,
         paint: {
-          'background-color': '#ffffff',
+          'background-color': '#121212',
         },
       },
     ],

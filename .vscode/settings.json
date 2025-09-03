@@ -7,7 +7,7 @@
     "editor.formatOnSave": true,
     "editor.formatOnSaveMode": "file",
     "editor.codeActionsOnSave": {
-        "source.sortImports": "explicit"
+        "source.organizeImports": "explicit"
     },
     "typescript.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyBraces": false
 }

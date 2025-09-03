@@ -3,14 +3,14 @@
 import type {MapData} from '@/stores/schemas';
 import {mapToFeatures} from '@/utils/area-converter';
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
-import {Box, useTheme} from '@mui/material';
+import {Box} from '@mui/material';
 import bbox from '@turf/bbox';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import {RFullscreenControl, RMap, RSource} from 'maplibre-react-components';
+import {RFullscreenControl, RMap} from 'maplibre-react-components';
 import {useMemo, useState} from 'react';
 import {DrawControl} from './DrawControl';
+import {drawStyles} from './drawStyles';
 import {FitToBoundsControl} from './FitBoundsControl';
-import MapLayers from './MapLayers';
 import {mapStyles} from './mapStyles';
 import {ToggleStyleControl} from './ToggleStyleControl';
 import type {BBox} from './types';
@@ -22,8 +22,6 @@ interface MowerMapProps {
 }
 
 export function MowerMap({mapData, width = '100%', height = '400px'}: MowerMapProps) {
-  const theme = useTheme();
-
   const [styleName, setStyleName] = useState<keyof typeof mapStyles>('white');
   const style = mapStyles[styleName];
   const toggleStyle = () => {
@@ -44,6 +42,7 @@ export function MowerMap({mapData, width = '100%', height = '400px'}: MowerMapPr
     <Box sx={{width, height, borderRadius: 3, overflow: 'hidden', position: 'relative'}}>
       <RMap
         id="map"
+        // key={JSON.stringify(drawStyles)}
         style={{width: '100%', height: '100%'}}
         mapStyle={style}
         initialAttributionControl={false}
@@ -55,6 +54,7 @@ export function MowerMap({mapData, width = '100%', height = '400px'}: MowerMapPr
         <ToggleStyleControl onClick={toggleStyle} />
         <DrawControl
           position="top-left"
+          features={features}
           displayControlsDefault={true}
           controls={{
             polygon: true,
@@ -62,20 +62,17 @@ export function MowerMap({mapData, width = '100%', height = '400px'}: MowerMapPr
             uncombine_features: true,
             combine_features: true,
           }}
+          styles={drawStyles}
           // modes={{
-          //   ...SelectFeatureMode(MapboxDraw.modes),
           //   ...SplitPolygonMode(MapboxDraw.modes),
           // }}
-          // styles={[...splitPolygonDrawStyles(MapboxDraw.lib.theme), ...selectFeatureDrawStyles(MapboxDraw.lib.theme)]}
-          defaultMode="draw_polygon"
+          // styles={[...splitPolygonDrawStyles(MapboxDraw.lib.theme)]}
+          defaultMode="simple_select"
           // onCreate={onUpdate}
           // onUpdate={onUpdate}
           // onDelete={onDelete}
           userProperties={true}
-          selectHighlightColor="red"
         />
-        <RSource id="features" type="geojson" data={features} />
-        <MapLayers theme={theme} />
       </RMap>
     </Box>
   );
