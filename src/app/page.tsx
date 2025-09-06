@@ -104,10 +104,7 @@ export default function Dashboard() {
 
   return (
     <Page>
-      <PageHeader
-        title="Welcome to LawnBot Control"
-        subtitle="Monitor and control your robotic lawnmowers with precision"
-      >
+      <PageHeader title="Dashboard" subtitle="Monitor and control your robotic lawnmowers with precision">
         <HeaderStat icon={<TrendingIcon />} value={mowers.length} label="Active Mowers" />
         <HeaderStat
           icon={<SpeedIcon />}

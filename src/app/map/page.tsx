@@ -126,10 +126,7 @@ export default function MapPage() {
 
   return (
     <Page>
-      <PageHeader
-        title="Lawn Coverage & Navigation"
-        subtitle="Real-time GPS tracking, area management, and intelligent path planning"
-      >
+      <PageHeader title="Map" subtitle="Real-time GPS tracking, area management, and intelligent path planning">
         <HeaderStat icon={<LocationIcon />} value={mockAreas.length} label="Managed Areas" />
         <HeaderStat
           icon={<PlayIcon />}

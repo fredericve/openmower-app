@@ -1,3 +1,5 @@
+'use client';
+
 import {Box, Typography, useTheme} from '@mui/material';
 import {PropsWithChildren} from 'react';
 
@@ -14,12 +16,14 @@ export default function PageHeader({title, subtitle, children}: PropsWithChildre
       sx={{
         background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
         color: 'white',
-        pt: 4,
-        pb: 6,
-        px: 3,
+        pt: {xs: 1, md: 4},
+        pb: {xs: 0, md: 6},
+        px: {xs: 0, md: 3},
+        mt: {xs: -1, md: 0},
         position: 'relative',
         overflow: 'hidden',
-        borderRadius: '20px',
+        borderRadius: {xs: '0 0 20px 20px', md: '20px'},
+        boxShadow: '0 2px 4px rgba(0,0,0,0.5)',
       }}
     >
       {/* Background Pattern */}
@@ -37,6 +41,7 @@ export default function PageHeader({title, subtitle, children}: PropsWithChildre
 
       <Box sx={{px: 3}}>
         <Box sx={{position: 'relative', zIndex: 1}}>
+          {/* Title */}
           <Typography
             variant="h2"
             component="h1"
@@ -45,12 +50,14 @@ export default function PageHeader({title, subtitle, children}: PropsWithChildre
           >
             {title}
           </Typography>
-          <Typography variant="h5" sx={{opacity: 0.9, fontWeight: 300, mb: 3}}>
+
+          {/* Subtitle */}
+          <Typography variant="h5" sx={{opacity: 0.9, fontWeight: 300, mb: 3, display: {xs: 'none', md: 'block'}}}>
             {subtitle}
           </Typography>
 
           {/* Quick Stats */}
-          <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 3, mt: 4}}>{children}</Box>
+          <Box sx={{display: {xs: 'none', md: 'flex'}, flexWrap: 'wrap', gap: 3, mt: 4}}>{children}</Box>
         </Box>
       </Box>
     </Box>
