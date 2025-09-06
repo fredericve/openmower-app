@@ -4,6 +4,7 @@ import {DownloadButton} from '@/components/map/DownloadButton';
 import {MowerMap} from '@/components/map/MowerMap';
 import {UploadButton} from '@/components/map/UploadButton';
 import {HeaderStat, Page, PageContent, PageHeader} from '@/components/page';
+import {innerCardStyles, outerCardStyles} from '@/lib/cardStyles';
 import {useSelectedMower} from '@/stores/mowersStore';
 
 import {
@@ -146,12 +147,8 @@ export default function MapPage() {
           <Box sx={{flex: 1, minHeight: '600px'}}>
             <Card
               sx={{
+                ...outerCardStyles,
                 height: '100%',
-                borderRadius: 4,
-                boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                background: 'rgba(255,255,255,0.95)',
-                backdropFilter: 'blur(10px)',
               }}
             >
               <CardContent sx={{p: 4}}>
@@ -274,15 +271,7 @@ export default function MapPage() {
 
           {/* Area Management Sidebar */}
           <Box sx={{width: isMobile ? '100%' : '400px'}}>
-            <Card
-              sx={{
-                borderRadius: 4,
-                boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                background: 'rgba(255,255,255,0.95)',
-                backdropFilter: 'blur(10px)',
-              }}
-            >
+            <Card sx={outerCardStyles}>
               <CardContent sx={{p: 4}}>
                 <Box sx={{display: 'flex', alignItems: 'center', gap: 2, mb: 3}}>
                   <Avatar sx={{bgcolor: theme.palette.success.main, width: 40, height: 40}}>{/* TerrainIcon */}</Avatar>
@@ -295,14 +284,12 @@ export default function MapPage() {
                   {mockAreas.map((area) => (
                     <Card
                       key={area.id}
-                      variant="outlined"
                       sx={{
-                        cursor: 'pointer',
+                        ...innerCardStyles,
                         borderColor: selectedArea === area.id ? theme.palette.primary.main : undefined,
                         backgroundColor: selectedArea === area.id ? theme.palette.primary.light + '10' : undefined,
-                        borderRadius: 3,
-                        transition: 'all 0.2s ease',
                         '&:hover': {
+                          ...innerCardStyles['&:hover'],
                           borderColor: theme.palette.primary.main,
                           backgroundColor: theme.palette.primary.light + '05',
                         },

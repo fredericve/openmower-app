@@ -1,6 +1,7 @@
 'use client';
 
 import {HeaderStat, Page, PageContent, PageHeader} from '@/components/page';
+import {outerCardStyles} from '@/lib/cardStyles';
 import {useMowers} from '@/stores/mowersStore';
 import {
   Battery90 as BatteryIcon,
@@ -139,13 +140,9 @@ export default function Dashboard() {
                 <Card
                   key={mower.id}
                   sx={{
+                    ...outerCardStyles,
                     flex: '1 1 450px',
                     minWidth: 0,
-                    borderRadius: 4,
-                    boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    background: 'rgba(255,255,255,0.95)',
-                    backdropFilter: 'blur(10px)',
                     transition: 'all 0.3s ease',
                     '&:hover': {
                       transform: 'translateY(-4px)',

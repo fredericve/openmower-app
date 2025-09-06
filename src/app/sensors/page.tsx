@@ -1,6 +1,7 @@
 'use client';
 
 import {HeaderStat, Page, PageContent, PageHeader} from '@/components/page';
+import {outerCardStyles} from '@/lib/cardStyles';
 
 import {
   BatteryFull as BatteryIcon,
@@ -93,7 +94,7 @@ export default function SensorsPage() {
       <PageContent>
         <Box sx={{display: 'flex', flexDirection: 'column', gap: 3}}>
           {/* System Status Overview */}
-          <Card>
+          <Card sx={outerCardStyles}>
             <CardContent>
               <Typography variant="h6" component="h2" gutterBottom>
                 System Status
@@ -122,7 +123,7 @@ export default function SensorsPage() {
           </Card>
 
           {/* Battery Status */}
-          <Card>
+          <Card sx={outerCardStyles}>
             <CardContent>
               <Typography variant="h6" component="h2" gutterBottom>
                 Battery Status
@@ -186,7 +187,7 @@ export default function SensorsPage() {
           </Card>
 
           {/* Motor Status */}
-          <Card>
+          <Card sx={outerCardStyles}>
             <CardContent>
               <Typography variant="h6" component="h2" gutterBottom>
                 Motor Status
@@ -255,7 +256,7 @@ export default function SensorsPage() {
           </Card>
 
           {/* Sensor Status */}
-          <Card>
+          <Card sx={outerCardStyles}>
             <CardContent>
               <Typography variant="h6" component="h2" gutterBottom>
                 Sensor Status

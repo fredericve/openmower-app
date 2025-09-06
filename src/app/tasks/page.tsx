@@ -1,6 +1,7 @@
 'use client';
 
 import {HeaderStat, Page, PageContent, PageHeader} from '@/components/page';
+import {innerCardStyles, outerCardStyles} from '@/lib/cardStyles';
 
 import {
   Add as AddIcon,
@@ -141,15 +142,7 @@ export default function TasksPage() {
         <Box sx={{display: 'flex', gap: 4, flexDirection: isMobile ? 'column' : 'row'}}>
           {/* Task List */}
           <Box sx={{flex: 1}}>
-            <Card
-              sx={{
-                borderRadius: 4,
-                boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                background: 'rgba(255,255,255,0.95)',
-                backdropFilter: 'blur(10px)',
-              }}
-            >
+            <Card sx={outerCardStyles}>
               <CardContent sx={{p: 4}}>
                 {/* Task List Header */}
                 <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4}}>
@@ -190,19 +183,15 @@ export default function TasksPage() {
                   {mockTasks.map((task) => (
                     <Card
                       key={task.id}
-                      variant="outlined"
                       sx={{
+                        ...innerCardStyles,
                         mb: 3,
-                        cursor: 'pointer',
                         borderColor: selectedTask === task.id ? theme.palette.primary.main : undefined,
                         backgroundColor: selectedTask === task.id ? theme.palette.primary.light + '10' : undefined,
-                        borderRadius: 3,
-                        transition: 'all 0.2s ease',
                         '&:hover': {
+                          ...innerCardStyles['&:hover'],
                           borderColor: theme.palette.primary.main,
                           backgroundColor: theme.palette.primary.light + '05',
-                          transform: 'translateY(-2px)',
-                          boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
                         },
                       }}
                       onClick={() => setSelectedTask(task.id)}
@@ -370,15 +359,7 @@ export default function TasksPage() {
 
           {/* Task Details Sidebar */}
           <Box sx={{width: isMobile ? '100%' : '400px'}}>
-            <Card
-              sx={{
-                borderRadius: 4,
-                boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                background: 'rgba(255,255,255,0.95)',
-                backdropFilter: 'blur(10px)',
-              }}
-            >
+            <Card sx={outerCardStyles}>
               <CardContent sx={{p: 4}}>
                 <Box sx={{display: 'flex', alignItems: 'center', gap: 2, mb: 3}}>
                   <Avatar sx={{bgcolor: theme.palette.info.main, width: 40, height: 40}}>
