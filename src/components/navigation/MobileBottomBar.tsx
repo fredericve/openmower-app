@@ -69,8 +69,8 @@ export default function MobileBottomBar({onMenuOpen}: MobileBottomBarProps) {
               },
             }}
           />
-          {navigationItems.map((item) => (
-            <BottomNavigationAction key={item.path} label={item.label} icon={item.icon} />
+          {navigationItems.map((item, idx) => (
+            <BottomNavigationAction key={item.path} value={idx} label={item.label} icon={item.icon} />
           ))}
         </BottomNavigation>
       </Paper>
