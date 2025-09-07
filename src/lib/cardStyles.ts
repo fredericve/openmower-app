@@ -1,17 +1,18 @@
 export const outerCardStyles = {
-  borderRadius: 4,
-  boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+  borderRadius: 2,
+  boxShadow: '0 0 12px -2px rgba(0,0,0,0.4)',
   border: '1px solid rgba(255,255,255,0.1)',
-  background: 'rgba(255,255,255,0.95)',
+  background: 'rgba(255,255,255,0.8)',
   backdropFilter: 'blur(10px)',
 };
 
 export const innerCardStyles = {
-  borderRadius: 3,
+  borderRadius: 1,
   transition: 'all 0.2s ease',
   cursor: 'pointer',
+  boxShadow: '0 4px 16px -2px rgba(0,0,0,0.3)',
   '&:hover': {
     transform: 'translateY(-2px)',
-    boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+    boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
   },
 };

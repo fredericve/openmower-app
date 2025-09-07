@@ -22,8 +22,8 @@ export default function PageHeader({title, subtitle, children}: PropsWithChildre
         mt: {xs: -1, md: 0},
         position: 'relative',
         overflow: 'hidden',
-        borderRadius: {xs: '0 0 20px 20px', md: '20px'},
-        boxShadow: '0 2px 4px rgba(0,0,0,0.5)',
+        borderRadius: {xs: '0 0 24px 24px', md: '24px'},
+        boxShadow: '0 2px 12px -2px rgba(0,0,0,0.4)',
       }}
     >
       {/* Background Pattern */}

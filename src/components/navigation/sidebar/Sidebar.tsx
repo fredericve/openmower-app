@@ -51,7 +51,7 @@ export default function Sidebar({open, onClose}: SidebarProps) {
     width: drawerWidth,
     boxShadow: '0 0 8px 4px rgba(0, 0, 0, 0.25)',
     border: 'none',
-    borderRadius: '0 20px 20px 0',
+    borderRadius: '0 24px 24px 0',
   };
 
   return (

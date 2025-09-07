@@ -34,7 +34,7 @@ export default function MobileBottomBar({onMenuOpen}: MobileBottomBarProps) {
           right: 0,
           zIndex: theme.zIndex.appBar + 1,
           borderRadius: '16px 16px 0 0',
-          boxShadow: '0 -4px 20px rgba(0,0,0,0.1)',
+          boxShadow: '0 -2px 12px -2px rgba(0,0,0,0.2)',
           border: '1px solid rgba(0,0,0,0.08)',
           borderBottom: 'none',
           display: {xs: 'block', md: 'none'},

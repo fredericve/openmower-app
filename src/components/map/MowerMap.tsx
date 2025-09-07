@@ -55,7 +55,7 @@ export function MowerMap({id, mapData, width = '100%', height = '400px', editMod
   }, [features, mapData.datum]);
 
   return (
-    <Box sx={{width, height, borderRadius: 3, overflow: 'hidden', position: 'relative'}}>
+    <Box sx={{width, height, borderRadius: 1, overflow: 'hidden', position: 'relative'}}>
       <RMap
         key={id}
         id={id}
