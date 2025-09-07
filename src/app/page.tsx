@@ -150,7 +150,7 @@ export default function Dashboard() {
                     },
                   }}
                 >
-                  <CardContent sx={{p: 4}}>
+                  <CardContent>
                     {/* Header with Status */}
                     <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3}}>
                       <Box>

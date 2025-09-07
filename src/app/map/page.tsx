@@ -151,7 +151,7 @@ export default function MapPage() {
                 height: '100%',
               }}
             >
-              <CardContent sx={{p: 4}}>
+              <CardContent>
                 {/* Map Header */}
                 <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3}}>
                   <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
@@ -272,7 +272,7 @@ export default function MapPage() {
           {/* Area Management Sidebar */}
           <Box sx={{width: isMobile ? '100%' : '400px'}}>
             <Card sx={outerCardStyles}>
-              <CardContent sx={{p: 4}}>
+              <CardContent>
                 <Box sx={{display: 'flex', alignItems: 'center', gap: 2, mb: 3}}>
                   <Avatar sx={{bgcolor: theme.palette.success.main, width: 40, height: 40}}>{/* TerrainIcon */}</Avatar>
                   <Typography variant="h5" component="h3" fontWeight="600">

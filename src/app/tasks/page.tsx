@@ -143,7 +143,7 @@ export default function TasksPage() {
           {/* Task List */}
           <Box sx={{flex: 1}}>
             <Card sx={outerCardStyles}>
-              <CardContent sx={{p: 4}}>
+              <CardContent>
                 {/* Task List Header */}
                 <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4}}>
                   <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
@@ -360,7 +360,7 @@ export default function TasksPage() {
           {/* Task Details Sidebar */}
           <Box sx={{width: isMobile ? '100%' : '400px'}}>
             <Card sx={outerCardStyles}>
-              <CardContent sx={{p: 4}}>
+              <CardContent>
                 <Box sx={{display: 'flex', alignItems: 'center', gap: 2, mb: 3}}>
                   <Avatar sx={{bgcolor: theme.palette.info.main, width: 40, height: 40}}>
                     <CheckIcon />
