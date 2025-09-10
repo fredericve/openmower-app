@@ -5,9 +5,10 @@ import {MowerMap} from '@/components/map/MowerMap';
 import {UploadButton} from '@/components/map/UploadButton';
 import {HeaderStat, Page, PageContent, PageHeader} from '@/components/page';
 import {useMapboxDraw, useMapContext} from '@/contexts/MapContext';
-import {innerCardStyles, outerCardStyles} from '@/lib/cardStyles';
+import {outerCardStyles} from '@/lib/cardStyles';
 import {useSelectedMower} from '@/stores/mowersStore';
-import {mapToFeatures} from '@/utils/area-converter';
+import {formatAreaSize, getAreaFeatures, mapToFeatures} from '@/utils/area-converter';
+import {area as turfArea} from '@turf/area';
 
 import {
   Add as AddIcon,
@@ -25,53 +26,22 @@ import {
   Button,
   Card,
   CardContent,
-  Chip,
   IconButton,
+  List,
+  ListItem,
   Paper,
   Typography,
   useMediaQuery,
   useTheme,
   type ButtonProps,
 } from '@mui/material';
-import {useEffect, useState} from 'react';
-
-// Mock data - in real app this would come from API
-const mockAreas = [
-  {
-    id: '1',
-    name: 'Back Garden',
-    status: 'active',
-    size: '150m²',
-    lastMowed: '2 hours ago',
-    pattern: '90° rotation',
-    coverage: 85,
-  },
-  {
-    id: '2',
-    name: 'Front Lawn',
-    status: 'pending',
-    size: '80m²',
-    lastMowed: '1 day ago',
-    pattern: 'Standard',
-    coverage: 0,
-  },
-  {
-    id: '3',
-    name: 'Side Garden',
-    status: 'completed',
-    size: '45m²',
-    lastMowed: '3 hours ago',
-    pattern: 'Spiral',
-    coverage: 100,
-  },
-];
+import {useEffect, useMemo} from 'react';
 
 export default function MapPage() {
   const draw = useMapboxDraw();
-  const {setFeatures, editMode, setEditMode} = useMapContext();
+  const {features, setFeatures, editMode, setEditMode} = useMapContext();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const [selectedArea, setSelectedArea] = useState<string | null>(null);
 
   // In display mode, send the features directly to the map.
   // In edit mode, the draw controll will take care of updates.
@@ -84,44 +54,16 @@ export default function MapPage() {
     }
   }, [draw, mapData, editMode, setFeatures]);
 
+  const workingAreas = useMemo(() => getAreaFeatures(features, 'working_area'), [features]);
+  const navigationAreas = useMemo(() => getAreaFeatures(features, 'navigation_area'), [features]);
+  const totalWorkingArea = useMemo(() => turfArea({type: 'FeatureCollection', features: workingAreas}), [workingAreas]);
+
   if (mapData === undefined) {
     return <div>No map data</div>;
   }
 
   const handleAreaAction = (action: string, areaId: string) => {
     console.log(`${action} for area ${areaId}`);
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active':
-        return 'success';
-      case 'pending':
-        return 'warning';
-      case 'completed':
-        return 'info';
-      default:
-        return 'default';
-    }
-  };
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'active':
-        return 'Mowing';
-      case 'pending':
-        return 'Pending';
-      case 'completed':
-        return 'Completed';
-      default:
-        return 'Unknown';
-    }
-  };
-
-  const getCoverageColor = (coverage: number) => {
-    if (coverage === 100) return 'success';
-    if (coverage > 50) return 'warning';
-    return 'error';
   };
 
   const buttonPropsPrimary: ButtonProps = {
@@ -141,17 +83,13 @@ export default function MapPage() {
   return (
     <Page>
       <PageHeader title="Map" subtitle="Real-time GPS tracking, area management, and intelligent path planning">
-        <HeaderStat icon={<LocationIcon />} value={mockAreas.length} label="Managed Areas" />
         <HeaderStat
-          icon={<PlayIcon />}
-          value={mockAreas.filter((a) => a.status === 'active').length}
-          label="Currently Mowing"
+          icon={<LocationIcon />}
+          value={workingAreas.length + navigationAreas.length}
+          label="Managed Areas"
         />
-        <HeaderStat
-          icon={<CheckIcon />}
-          value={`${Math.round(mockAreas.reduce((acc, a) => acc + a.coverage, 0) / mockAreas.length)}%`}
-          label="Average Coverage"
-        />
+        <HeaderStat icon={<PlayIcon />} value={formatAreaSize(totalWorkingArea)} label="Total Mowing Area" />
+        <HeaderStat icon={<CheckIcon />} value={workingAreas.length} label="Mowing Areas" />
       </PageHeader>
 
       <PageContent>
@@ -283,91 +221,83 @@ export default function MapPage() {
           </Box>
 
           {/* Area Management Sidebar */}
-          <Box sx={{width: isMobile ? '100%' : '400px'}}>
-            <Card sx={outerCardStyles}>
-              <CardContent>
-                <Box sx={{display: 'flex', alignItems: 'center', gap: 2, mb: 3}}>
-                  <Avatar sx={{bgcolor: theme.palette.success.main, width: 40, height: 40}}>{/* TerrainIcon */}</Avatar>
-                  <Typography variant="h5" component="h3" fontWeight="600">
-                    Mowing Areas
-                  </Typography>
-                </Box>
+          <Box sx={{width: isMobile ? '100%' : '400px', display: 'flex', flexDirection: 'column', gap: 3}}>
+            {/* Working Areas */}
+            {workingAreas.length > 0 && (
+              <Card sx={outerCardStyles}>
+                <CardContent>
+                  <Box sx={{display: 'flex', alignItems: 'center', gap: 2, mb: 2}}>
+                    <Avatar sx={{bgcolor: theme.palette.primary.main, width: 40, height: 40}}>
+                      {/* TerrainIcon */}
+                    </Avatar>
+                    <Typography variant="h5" component="h3" fontWeight="600">
+                      Mowing Areas
+                    </Typography>
+                  </Box>
 
-                <Box sx={{display: 'flex', flexDirection: 'column', gap: 3}}>
-                  {mockAreas.map((area) => (
-                    <Card
-                      key={area.id}
-                      sx={{
-                        ...innerCardStyles,
-                        borderColor: selectedArea === area.id ? theme.palette.primary.main : undefined,
-                        backgroundColor: selectedArea === area.id ? theme.palette.primary.light + '10' : undefined,
-                        '&:hover': {
-                          ...innerCardStyles['&:hover'],
-                          borderColor: theme.palette.primary.main,
-                          backgroundColor: theme.palette.primary.light + '05',
-                        },
-                      }}
-                      onClick={() => setSelectedArea(area.id)}
-                    >
-                      <CardContent sx={{py: 2.5, '&:last-child': {pb: 2.5}}}>
-                        {/* Area Header */}
-                        <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2}}>
-                          <Box>
-                            <Typography variant="h6" fontWeight="600" gutterBottom>
-                              {area.name}
-                            </Typography>
-                            <Box sx={{display: 'flex', gap: 1, flexWrap: 'wrap'}}>
-                              <Chip
-                                label={getStatusLabel(area.status)}
-                                color={getStatusColor(area.status)}
-                                size="small"
-                                sx={{fontWeight: 500}}
-                              />
-                              <Chip label={area.pattern} variant="outlined" size="small" sx={{fontWeight: 500}} />
-                            </Box>
-                          </Box>
-                          <Box sx={{display: 'flex', gap: 1}}>
-                            <IconButton size="small" color="primary" sx={{bgcolor: theme.palette.primary.light + '20'}}>
-                              <EditIcon fontSize="small" />
-                            </IconButton>
-                            <IconButton size="small" color="error" sx={{bgcolor: theme.palette.error.light + '20'}}>
-                              <DeleteIcon fontSize="small" />
-                            </IconButton>
-                          </Box>
-                        </Box>
-
-                        {/* Area Details */}
-                        <Box sx={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, mb: 2}}>
-                          <Box>
-                            <Typography variant="caption" color="text.secondary" display="block">
-                              Size
-                            </Typography>
-                            <Typography variant="body2" fontWeight="500">
-                              {area.size}
-                            </Typography>
-                          </Box>
-                          <Box>
-                            <Typography variant="caption" color="text.secondary" display="block">
-                              Coverage
-                            </Typography>
-                            <Typography variant="body2" fontWeight="500" color={getCoverageColor(area.coverage)}>
-                              {area.coverage}%
-                            </Typography>
-                          </Box>
-                        </Box>
-
-                        {/* Last Mowed */}
-                        <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                  <List sx={{p: 0}}>
+                    {workingAreas.map((area) => (
+                      <ListItem
+                        key={area.properties.name}
+                        sx={{
+                          px: 0,
+                          py: 0.5,
+                          cursor: 'pointer',
+                          borderBottom: '1px solid',
+                          borderColor: theme.palette.divider,
+                          '&:last-child': {
+                            borderBottom: 'none',
+                          },
+                          '&:hover': {
+                            backgroundColor: theme.palette.primary.main,
+                            color: theme.palette.primary.contrastText,
+                          },
+                        }}
+                      >
+                        <Box sx={{flex: 1, py: 0.5, px: 2, mr: 1}}>
+                          <Typography variant="h6" fontWeight="600">
+                            {area.properties.name}
+                          </Typography>
                           <Typography variant="caption" color="text.secondary">
-                            Last mowed: {area.lastMowed}
+                            {formatAreaSize(turfArea(area.geometry))} • Last mowed: Never
                           </Typography>
                         </Box>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </Box>
-              </CardContent>
-            </Card>
+                        <Box sx={{display: 'flex', gap: 1, mr: 2}}>
+                          <IconButton
+                            size="small"
+                            color="error"
+                            className="delete-button"
+                            sx={{bgcolor: theme.palette.error.light + '20'}}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleAreaAction('delete', area.properties.name || '');
+                            }}
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </Box>
+                      </ListItem>
+                    ))}
+                  </List>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Navigation Areas */}
+            {navigationAreas.length > 0 && (
+              <Card sx={outerCardStyles}>
+                <CardContent>
+                  <Box sx={{display: 'flex', alignItems: 'center', gap: 2, mb: 3}}>
+                    <Avatar sx={{bgcolor: theme.palette.secondary.main, width: 40, height: 40}}>
+                      {/* NavigationIcon */}
+                    </Avatar>
+                    <Typography variant="h5" component="h3" fontWeight="600">
+                      Navigation Areas
+                    </Typography>
+                  </Box>
+                </CardContent>
+              </Card>
+            )}
           </Box>
         </Box>
       </PageContent>

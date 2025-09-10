@@ -1,4 +1,7 @@
+import {customAlphabet} from 'nanoid/non-secure';
 import {z} from 'zod/v4';
+
+const nanoid = customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 32);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // State
@@ -41,6 +44,7 @@ export type State = z.infer<typeof stateSchema>;
 const pointSchema = z.object({x: z.number(), y: z.number()});
 const polygonSchema = z.array(pointSchema);
 const areaSchema = z.object({
+  id: z.string().default(nanoid),
   name: z.string(),
   obstacles: z.array(polygonSchema).nullable(),
   outline: polygonSchema,

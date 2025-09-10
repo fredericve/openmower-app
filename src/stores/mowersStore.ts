@@ -2,7 +2,7 @@ import mqtt, {MqttClient} from 'mqtt';
 import {create, useStore} from 'zustand';
 import {immer} from 'zustand/middleware/immer';
 import {useConfigStore} from './configStore';
-import {mapDefaults, mapSchema, stateDefaults, stateSchema, type MapData, type State} from './schemas';
+import {mapDefaults, mapSchema, stateDefaults, stateSchema, type Area, type MapData, type State} from './schemas';
 
 interface Mower {
   id: string;
@@ -79,7 +79,10 @@ export const useMowersStore = create<MowersStore>()(
               });
             } else if (partialTopic === 'map/json') {
               set((state) => {
-                state.mowers[idx].map = mapSchema.parse(JSON.parse(payload.toString()));
+                const map = mapSchema.parse(JSON.parse(payload.toString()));
+                generateAreaNames('Working Area', map.working_areas ?? []);
+                generateAreaNames('Navigation Area', map.navigation_areas ?? []);
+                state.mowers[idx].map = map;
               });
             }
           }
@@ -89,6 +92,14 @@ export const useMowersStore = create<MowersStore>()(
     },
   })),
 );
+
+const generateAreaNames = (prefix: string, areas: Area[]) => {
+  for (const [idx, area] of areas.entries()) {
+    if (area.name === '') {
+      area.name = `${prefix} ${idx}`;
+    }
+  }
+};
 
 export const useMowers = () => {
   // FIXME - this is a hack to get the mowers from the store
