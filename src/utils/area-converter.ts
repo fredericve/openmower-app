@@ -1,4 +1,4 @@
-import type {Area, AreaProps, AreaType, MapData} from '@/stores/schemas';
+import type {Area, AreaProps, MapData} from '@/stores/schemas';
 import {
   datumToRelative,
   pointsToAbsolute,
@@ -84,15 +84,4 @@ export function getFeatureDescription(feature: Feature) {
   }
 
   return type;
-}
-
-export function getAreaFeatures(features: FeatureCollection, type: AreaType): Feature<Polygon, AreaProps>[] {
-  return features.features.filter(
-    (feature): feature is Feature<Polygon, AreaProps> =>
-      feature.geometry.type === 'Polygon' && feature.properties?.type === type,
-  );
-}
-
-export function formatAreaSize(squareMeters: number): string {
-  return `${Math.round(squareMeters)}m²`;
 }

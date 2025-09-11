@@ -7,9 +7,10 @@ import {HeaderStat, Page, PageContent, PageHeader} from '@/components/page';
 import {useMapboxDraw, useMapContext} from '@/contexts/MapContext';
 import {outerCardStyles} from '@/lib/cardStyles';
 import {useSelectedMower} from '@/stores/mowersStore';
-import {formatAreaSize, getAreaFeatures, mapToFeatures} from '@/utils/area-converter';
+import {mapToFeatures} from '@/utils/area-converter';
 import {area as turfArea} from '@turf/area';
 
+import {AreaProps} from '@/stores/schemas';
 import {
   Add as AddIcon,
   CheckCircle as CheckIcon,
@@ -35,7 +36,12 @@ import {
   useTheme,
   type ButtonProps,
 } from '@mui/material';
+import {Feature, Polygon} from 'geojson';
 import {useEffect, useMemo} from 'react';
+
+function formatAreaSize(squareMeters: number): string {
+  return `${Math.round(squareMeters)}m²`;
+}
 
 export default function MapPage() {
   const draw = useMapboxDraw();
@@ -54,8 +60,11 @@ export default function MapPage() {
     }
   }, [draw, mapData, editMode, setFeatures]);
 
-  const workingAreas = useMemo(() => getAreaFeatures(features, 'mow'), [features]);
-  const navigationAreas = useMemo(() => getAreaFeatures(features, 'nav'), [features]);
+  const areas = useMemo(
+    () => features.features.filter((feature) => feature.geometry.type === 'Polygon') as Feature<Polygon, AreaProps>[],
+    [features],
+  );
+  const workingAreas = useMemo(() => areas.filter((area) => area.properties.type === 'mow'), [areas]);
   const totalWorkingArea = useMemo(() => turfArea({type: 'FeatureCollection', features: workingAreas}), [workingAreas]);
 
   if (mapData === undefined) {
@@ -83,11 +92,7 @@ export default function MapPage() {
   return (
     <Page>
       <PageHeader title="Map" subtitle="Real-time GPS tracking, area management, and intelligent path planning">
-        <HeaderStat
-          icon={<LocationIcon />}
-          value={workingAreas.length + navigationAreas.length}
-          label="Managed Areas"
-        />
+        <HeaderStat icon={<LocationIcon />} value={areas.length} label="Managed Areas" />
         <HeaderStat icon={<PlayIcon />} value={formatAreaSize(totalWorkingArea)} label="Total Mowing Area" />
         <HeaderStat icon={<CheckIcon />} value={workingAreas.length} label="Mowing Areas" />
       </PageHeader>
@@ -222,82 +227,63 @@ export default function MapPage() {
 
           {/* Area Management Sidebar */}
           <Box sx={{width: isMobile ? '100%' : '400px', display: 'flex', flexDirection: 'column', gap: 3}}>
-            {/* Working Areas */}
-            {workingAreas.length > 0 && (
-              <Card sx={outerCardStyles}>
-                <CardContent>
-                  <Box sx={{display: 'flex', alignItems: 'center', gap: 2, mb: 2}}>
-                    <Avatar sx={{bgcolor: theme.palette.primary.main, width: 40, height: 40}}>
-                      {/* TerrainIcon */}
-                    </Avatar>
-                    <Typography variant="h5" component="h3" fontWeight="600">
-                      Mowing Areas
-                    </Typography>
-                  </Box>
+            {/* Areas */}
+            <Card sx={outerCardStyles}>
+              <CardContent>
+                <Box sx={{display: 'flex', alignItems: 'center', gap: 2, mb: 2}}>
+                  <Avatar sx={{bgcolor: theme.palette.primary.main, width: 40, height: 40}}>{/* TerrainIcon */}</Avatar>
+                  <Typography variant="h5" component="h3" fontWeight="600">
+                    Areas
+                  </Typography>
+                </Box>
 
-                  <List sx={{p: 0}}>
-                    {workingAreas.map((area) => (
-                      <ListItem
-                        key={area.properties.name}
-                        sx={{
-                          px: 0,
-                          py: 0.5,
-                          cursor: 'pointer',
-                          borderBottom: '1px solid',
-                          borderColor: theme.palette.divider,
-                          '&:last-child': {
-                            borderBottom: 'none',
-                          },
-                          '&:hover': {
-                            backgroundColor: theme.palette.primary.main,
-                            color: theme.palette.primary.contrastText,
-                          },
-                        }}
-                      >
-                        <Box sx={{flex: 1, py: 0.5, px: 2, mr: 1}}>
-                          <Typography variant="h6" fontWeight="600">
-                            {area.properties.name}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            {formatAreaSize(turfArea(area.geometry))} • Last mowed: Never
-                          </Typography>
-                        </Box>
-                        <Box sx={{display: 'flex', gap: 1, mr: 2}}>
-                          <IconButton
-                            size="small"
-                            color="error"
-                            className="delete-button"
-                            sx={{bgcolor: theme.palette.error.light + '20'}}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleAreaAction('delete', area.properties.name || '');
-                            }}
-                          >
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
-                        </Box>
-                      </ListItem>
-                    ))}
-                  </List>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Navigation Areas */}
-            {navigationAreas.length > 0 && (
-              <Card sx={outerCardStyles}>
-                <CardContent>
-                  <Box sx={{display: 'flex', alignItems: 'center', gap: 2, mb: 3}}>
-                    <Avatar sx={{bgcolor: theme.palette.secondary.main, width: 40, height: 40}}>
-                      {/* NavigationIcon */}
-                    </Avatar>
-                    <Typography variant="h5" component="h3" fontWeight="600">
-                      Navigation Areas
-                    </Typography>
-                  </Box>
-                </CardContent>
-              </Card>
-            )}
+                <List sx={{p: 0}}>
+                  {areas.map((area) => (
+                    <ListItem
+                      key={area.id}
+                      sx={{
+                        px: 0,
+                        py: 0.5,
+                        cursor: 'pointer',
+                        borderBottom: '1px solid',
+                        borderColor: theme.palette.divider,
+                        '&:last-child': {
+                          borderBottom: 'none',
+                        },
+                        '&:hover': {
+                          backgroundColor: theme.palette.primary.main,
+                          color: theme.palette.primary.contrastText,
+                        },
+                      }}
+                    >
+                      <Box sx={{flex: 1, py: 0.5, px: 2, mr: 1}}>
+                        <Typography variant="h6" fontWeight="600">
+                          {area.properties.name}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {formatAreaSize(turfArea(area.geometry))}
+                          {area.properties.type === 'mow' ? ' • Last mowed: Never' : ''}
+                        </Typography>
+                      </Box>
+                      <Box sx={{display: 'flex', gap: 1, mr: 2}}>
+                        <IconButton
+                          size="small"
+                          color="error"
+                          className="delete-button"
+                          sx={{bgcolor: theme.palette.error.light + '20'}}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleAreaAction('delete', area.properties.name || '');
+                          }}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </Box>
+                    </ListItem>
+                  ))}
+                </List>
+              </CardContent>
+            </Card>
           </Box>
         </Box>
       </PageContent>
