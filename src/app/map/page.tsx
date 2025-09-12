@@ -4,7 +4,7 @@ import {DownloadButton} from '@/components/map/DownloadButton';
 import {MowerMap} from '@/components/map/MowerMap';
 import {UploadButton} from '@/components/map/UploadButton';
 import {HeaderStat, Page, PageContent, PageHeader} from '@/components/page';
-import {useMapboxDraw, useMapContext} from '@/contexts/MapContext';
+import {useMapboxDraw, useMapContext, useMapSelection} from '@/contexts/MapContext';
 import {outerCardStyles} from '@/lib/cardStyles';
 import {useSelectedMower} from '@/stores/mowersStore';
 import {mapToFeatures} from '@/utils/area-converter';
@@ -45,6 +45,7 @@ function formatAreaSize(squareMeters: number): string {
 
 export default function MapPage() {
   const draw = useMapboxDraw();
+  const selectedIds = useMapSelection();
   const {features, setFeatures, editMode, setEditMode} = useMapContext();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -247,6 +248,9 @@ export default function MapPage() {
                         cursor: 'pointer',
                         borderBottom: '1px solid',
                         borderColor: theme.palette.divider,
+                        backgroundColor: selectedIds.includes(area.id as string)
+                          ? theme.palette.primary.dark
+                          : undefined,
                         '&:last-child': {
                           borderBottom: 'none',
                         },

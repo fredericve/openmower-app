@@ -1,7 +1,7 @@
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
-import {FeatureCollection} from 'geojson';
+import {Feature, FeatureCollection} from 'geojson';
 import {useMap as useMapLibreMap} from 'maplibre-react-components';
-import {createContext, Dispatch, SetStateAction, useContext, useState} from 'react';
+import {createContext, Dispatch, SetStateAction, useContext, useEffect, useState} from 'react';
 import {Updater, useImmer} from 'use-immer';
 
 interface MapContextType {
@@ -36,4 +36,25 @@ export function useMap() {
 export function useMapboxDraw() {
   const map = useMap();
   return map?._controls.find((control) => control instanceof MapboxDraw) ?? null;
+}
+
+export function useMapSelection() {
+  const map = useMap();
+  const draw = useMapboxDraw();
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  useEffect(() => {
+    if (map && draw) {
+      setSelectedIds(draw.getSelectedIds());
+      const updateSelectedIds = ({features}: {features: Feature[]}) => {
+        setSelectedIds(features.map((feature) => feature.id as string));
+      };
+      map?.on('draw.selectionchange', updateSelectedIds);
+      return () => {
+        map.off('draw.selectionchange', updateSelectedIds);
+      };
+    } else {
+      setSelectedIds([]);
+    }
+  }, [map, draw]);
+  return selectedIds;
 }
