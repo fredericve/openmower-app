@@ -1,7 +1,11 @@
-import {Box} from '@mui/material';
+import {Box, type SxProps} from '@mui/material';
 import {PropsWithChildren} from 'react';
 
-export default function PageContent({children}: PropsWithChildren) {
+interface PageContentProps {
+  sx?: SxProps;
+}
+
+export default function PageContent({children, sx}: PropsWithChildren<PageContentProps>) {
   return (
     <Box
       sx={{
@@ -9,6 +13,7 @@ export default function PageContent({children}: PropsWithChildren) {
         mt: {xs: 1, md: -4},
         position: 'relative',
         zIndex: 2,
+        ...sx,
       }}
     >
       {children}

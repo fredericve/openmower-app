@@ -1,15 +1,17 @@
 'use client';
 
 import {useMapContext} from '@/contexts/MapContext';
-import {MapData} from '@/stores/schemas';
+import {MapData, type AreaProps} from '@/stores/schemas';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import StaticMode from '@mapbox/mapbox-gl-draw-static-mode';
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
-import {Box, type SxProps} from '@mui/material';
+import {Box, useMediaQuery, useTheme, type SxProps} from '@mui/material';
 import bbox from '@turf/bbox';
+import type {Feature, Polygon} from 'geojson';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import {RFullscreenControl, RMap} from 'maplibre-react-components';
 import {useMemo, useState} from 'react';
+import AreasList from './AreasList';
 import {DrawControl} from './DrawControl';
 import {drawStyles} from './drawStyles';
 import {FitToBoundsControl} from './FitBoundsControl';
@@ -25,6 +27,12 @@ interface MowerMapProps {
 
 export function MowerMap({mapData, sx}: MowerMapProps) {
   const {id, editMode, features} = useMapContext();
+  const areas = useMemo(
+    () => features.features.filter((feature) => feature.geometry.type === 'Polygon') as Feature<Polygon, AreaProps>[],
+    [features],
+  );
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [styleName, setStyleName] = useState<keyof typeof mapStyles>('white');
   const style = mapStyles[styleName];
   const toggleStyle = () => {
@@ -70,6 +78,20 @@ export function MowerMap({mapData, sx}: MowerMapProps) {
           userProperties={true}
         />
         <MainControls />
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 10,
+            right: 10,
+            bottom: 10,
+            width: isMobile ? '100%' : '400px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 3,
+          }}
+        >
+          <AreasList areas={areas} />
+        </Box>
       </RMap>
     </Box>
   );

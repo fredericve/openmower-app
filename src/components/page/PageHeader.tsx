@@ -1,14 +1,15 @@
 'use client';
 
-import {Box, Typography, useTheme} from '@mui/material';
+import {Box, Typography, useTheme, type SxProps} from '@mui/material';
 import {PropsWithChildren} from 'react';
 
 interface PageHeaderProps {
   title: string;
   subtitle: string;
+  sx?: SxProps;
 }
 
-export default function PageHeader({title, subtitle, children}: PropsWithChildren<PageHeaderProps>) {
+export default function PageHeader({title, subtitle, children, sx}: PropsWithChildren<PageHeaderProps>) {
   const theme = useTheme();
 
   return (
@@ -24,6 +25,7 @@ export default function PageHeader({title, subtitle, children}: PropsWithChildre
         overflow: 'hidden',
         borderRadius: {xs: '0 0 24px 24px', md: '24px'},
         boxShadow: '0 2px 12px -2px rgba(0,0,0,0.4)',
+        ...sx,
       }}
     >
       {/* Background Pattern */}

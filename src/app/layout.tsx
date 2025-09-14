@@ -33,7 +33,7 @@ export default async function RootLayout({
         <ConfigInitializer config={config} />
         <ThemeProvider theme={theme}>
           <AppRouterCacheProvider>
-            <Box sx={{display: 'flex', height: '100vh'}}>
+            <Box sx={{display: 'flex', height: '100dvh'}}>
               <Navigation />
               <Box
                 component="main"

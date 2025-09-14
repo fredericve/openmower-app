@@ -1,11 +1,11 @@
-import {Box} from '@mui/material';
-import {PropsWithChildren, ReactNode} from 'react';
+import {Box, type SxProps} from '@mui/material';
+import {PropsWithChildren} from 'react';
 
 interface PageProps {
-  children: ReactNode;
+  sx?: SxProps;
 }
 
-export default function Page({children}: PropsWithChildren<PageProps>) {
+export default function Page({children, sx}: PropsWithChildren<PageProps>) {
   return (
     <Box
       sx={{
@@ -13,6 +13,7 @@ export default function Page({children}: PropsWithChildren<PageProps>) {
         flexDirection: 'column',
         mx: {xs: 1, md: 2},
         my: 1,
+        ...sx,
       }}
     >
       {children}
