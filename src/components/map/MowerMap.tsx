@@ -8,6 +8,7 @@ import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 import {Box, useMediaQuery, useTheme, type SxProps} from '@mui/material';
 import bbox from '@turf/bbox';
 import type {Feature, Polygon} from 'geojson';
+import {LayoutListIcon} from 'lucide-react';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import {RFullscreenControl, RMap} from 'maplibre-react-components';
 import {useMemo, useState} from 'react';
@@ -15,7 +16,7 @@ import AreasList from './AreasList';
 import {DrawControl} from './DrawControl';
 import {drawStyles} from './drawStyles';
 import {FitToBoundsControl} from './FitBoundsControl';
-import {MainControls} from './MainControls';
+import {ControlButton, MainControls} from './MainControls';
 import {mapStyles} from './mapStyles';
 import {ToggleStyleControl} from './ToggleStyleControl';
 import type {BBox} from './types';
@@ -33,6 +34,7 @@ export function MowerMap({mapData, sx}: MowerMapProps) {
   );
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const [showAreaList, setShowAreaList] = useState(!isMobile);
   const [styleName, setStyleName] = useState<keyof typeof mapStyles>('white');
   const style = mapStyles[styleName];
   const toggleStyle = () => {
@@ -78,20 +80,26 @@ export function MowerMap({mapData, sx}: MowerMapProps) {
           userProperties={true}
         />
         <MainControls />
-        <Box
-          sx={{
-            position: 'absolute',
-            top: 10,
-            right: 10,
-            bottom: 10,
-            width: isMobile ? '100%' : '400px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 3,
-          }}
-        >
-          <AreasList areas={areas} />
-        </Box>
+        {showAreaList && !isMobile && (
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 10,
+              right: 60,
+              bottom: 10,
+              width: '400px',
+            }}
+          >
+            <AreasList areas={areas} />
+          </Box>
+        )}
+        <ControlButton
+          position="top-right"
+          icon={LayoutListIcon}
+          title="Show area list"
+          active={showAreaList}
+          onClick={() => setShowAreaList(!showAreaList)}
+        />
       </RMap>
     </Box>
   );

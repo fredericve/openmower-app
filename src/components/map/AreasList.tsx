@@ -11,8 +11,8 @@ import {Feature, Polygon} from 'geojson';
 export default function AreasList({areas}: {areas: Feature<Polygon, AreaProps>[]}) {
   const selectedIds = useMapSelection();
   return (
-    <Card sx={outerCardStyles}>
-      <CardContent>
+    <Card sx={{...outerCardStyles, height: '100%'}}>
+      <CardContent sx={{height: '100%', display: 'flex', flexDirection: 'column'}}>
         <Box sx={{display: 'flex', alignItems: 'center', gap: 2, mb: 2}}>
           <Avatar sx={{bgcolor: theme.palette.primary.main, width: 40, height: 40}}>{/* TerrainIcon */}</Avatar>
           <Typography variant="h5" component="h3" fontWeight="600">
@@ -20,7 +20,7 @@ export default function AreasList({areas}: {areas: Feature<Polygon, AreaProps>[]
           </Typography>
         </Box>
 
-        <List sx={{p: 0}}>
+        <List sx={{p: 0, overflow: 'auto'}}>
           {areas.map((area) => (
             <ListItem
               key={area.id}

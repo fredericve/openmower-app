@@ -11,22 +11,28 @@ import type {ControlPosition} from 'maplibre-gl';
 import {useRControl} from 'maplibre-react-components';
 import {createPortal} from 'react-dom';
 
-const ControlButton = ({
+export const ControlButton = ({
   position,
   icon: Icon,
   title,
+  active = false,
   onClick,
   spaced = false,
 }: {
   position: ControlPosition;
   icon: React.ElementType;
   title: string;
+  active?: boolean;
   onClick: () => void;
   spaced?: boolean;
 }) => {
+  const className =
+    'maplibregl-ctrl maplibregl-ctrl-group' +
+    (active ? ' maplibregl-ctrl-active' : '') +
+    (spaced ? ' maplibregl-ctrl-spaced' : '');
   const {container} = useRControl({
     position,
-    className: spaced ? 'maplibregl-ctrl maplibregl-ctrl-group maplibregl-ctrl-spaced' : undefined,
+    className: className,
   });
   return createPortal(
     <button type="button" onClick={onClick} title={title}>

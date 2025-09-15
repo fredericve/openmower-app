@@ -49,6 +49,10 @@ a {
   height: 40px !important;
 }
 
+.maplibregl-ctrl-active {
+  background-color: #4caf50 !important;
+}
+
 @media (prefers-color-scheme: dark) {
   html {
     color-scheme: dark;
