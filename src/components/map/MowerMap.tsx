@@ -63,7 +63,7 @@ export function MowerMap({mapData, sx}: MowerMapProps) {
         initialBounds={bounds}
       >
         <RFullscreenControl />
-        <FitToBoundsControl bounds={bounds} />
+        <FitToBoundsControl bounds={bounds} extraRightPadding={!isMobile && showAreaList ? 460 : 0} />
         <ToggleStyleControl onClick={toggleStyle} />
         <DrawControl
           displayControlsDefault={false}
