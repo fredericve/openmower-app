@@ -62,7 +62,25 @@ export function AreaSettingsDialog({open, onClose}: AreaSettingsDialogProps) {
   }
 
   return (
-    <Dialog open={open} maxWidth="xs" fullWidth disablePortal onClose={onClose}>
+    <Dialog
+      open={open}
+      maxWidth="xs"
+      fullWidth
+      disablePortal
+      onClose={onClose}
+      slotProps={{
+        root: {
+          sx: {
+            position: 'absolute',
+          },
+        },
+        backdrop: {
+          sx: {
+            position: 'absolute',
+          },
+        },
+      }}
+    >
       <DialogTitle>Area Settings</DialogTitle>
       <DialogContent>
         <TextField

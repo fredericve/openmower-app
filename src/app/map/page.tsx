@@ -51,7 +51,10 @@ export default function MapPage() {
         <HeaderStat icon={<CheckIcon />} value={workingAreas.length} label="Mowing Areas" />
       </PageHeader>
       <PageContent sx={{flex: 1, position: 'relative'}}>
-        <MowerMap mapData={mapData} sx={{...outerCardStyles, backgroundColor: 'black', height: '100%'}} />
+        <MowerMap
+          mapData={mapData}
+          sx={{...outerCardStyles, backgroundColor: 'black', backdropFilter: 'unset', height: '100%'}}
+        />
       </PageContent>
     </Page>
   );
