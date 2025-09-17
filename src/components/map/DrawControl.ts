@@ -1,6 +1,14 @@
 import {useMapContext} from '@/contexts/MapContext';
-import type {DrawCreateEvent, DrawDeleteEvent, DrawUpdateEvent, MapboxDrawOptions} from '@mapbox/mapbox-gl-draw';
-import MapboxDraw from '@mapbox/mapbox-gl-draw';
+import type {
+  DrawActionableEvent,
+  DrawCreateEvent,
+  DrawDeleteEvent,
+  DrawModeChangeEvent,
+  DrawUpdateEvent,
+  MapboxDrawOptions,
+} from '@mapbox/mapbox-gl-draw';
+import MapboxDraw, {type DrawMode} from '@mapbox/mapbox-gl-draw';
+import type {Feature} from 'geojson';
 import type {ControlPosition} from 'maplibre-gl';
 import {useControl, useMap} from 'maplibre-react-components';
 import {useCallback, useEffect} from 'react';
@@ -10,12 +18,26 @@ constants.CONTROL_BASE = 'maplibregl-ctrl';
 constants.CONTROL_PREFIX = 'maplibregl-ctrl-';
 constants.CONTROL_GROUP = 'maplibregl-ctrl-group';
 
-export function DrawControl({position = 'top-left', ...props}: MapboxDrawOptions & {position?: ControlPosition}) {
-  const {editMode, setFeatures} = useMapContext();
+export function DrawControl({
+  position = 'top-left',
+  onFeaturesCreated,
+  ...props
+}: MapboxDrawOptions & {position?: ControlPosition; onFeaturesCreated?: (features: Feature[]) => void}) {
+  const {editMode, setFeatures, setDrawMode, setTrashEnabled} = useMapContext();
   const map = useMap();
   const draw = useControl({
     position,
-    factory: () => new MapboxDraw(props),
+    factory: () => {
+      const draw = new MapboxDraw(props);
+      const originalChangeMode = draw.changeMode.bind(draw);
+      draw.changeMode = (mode: DrawMode, options = {}) => {
+        // @ts-expect-error don't care about the variants
+        originalChangeMode(mode, options);
+        setDrawMode(mode);
+        return draw;
+      };
+      return draw;
+    },
   }) as MapboxDraw;
 
   const onDrawChange = useCallback(
@@ -24,6 +46,7 @@ export function DrawControl({position = 'top-left', ...props}: MapboxDrawOptions
         setFeatures((draft) => {
           draft.features.push(...e.features);
         });
+        onFeaturesCreated?.(e.features);
       } else if (e.type === 'draw.update') {
         setFeatures((draft) => {
           for (const updatedFeature of e.features) {
@@ -44,7 +67,21 @@ export function DrawControl({position = 'top-left', ...props}: MapboxDrawOptions
         });
       }
     },
-    [setFeatures],
+    [setFeatures, onFeaturesCreated],
+  );
+
+  const onModeChange = useCallback(
+    (e: DrawModeChangeEvent) => {
+      setDrawMode(e.mode);
+    },
+    [setDrawMode],
+  );
+
+  const onActionableChange = useCallback(
+    (e: DrawActionableEvent) => {
+      setTrashEnabled(e.actions.trash);
+    },
+    [setTrashEnabled],
   );
 
   useEffect(() => {
@@ -52,13 +89,17 @@ export function DrawControl({position = 'top-left', ...props}: MapboxDrawOptions
       map.on(MapboxDraw.constants.events.CREATE, onDrawChange);
       map.on(MapboxDraw.constants.events.UPDATE, onDrawChange);
       map.on(MapboxDraw.constants.events.DELETE, onDrawChange);
+      map.on(MapboxDraw.constants.events.MODE_CHANGE, onModeChange);
+      map.on(MapboxDraw.constants.events.ACTIONABLE, onActionableChange);
       return () => {
         map.off(MapboxDraw.constants.events.CREATE, onDrawChange);
         map.off(MapboxDraw.constants.events.UPDATE, onDrawChange);
         map.off(MapboxDraw.constants.events.DELETE, onDrawChange);
+        map.off(MapboxDraw.constants.events.MODE_CHANGE, onModeChange);
+        map.off(MapboxDraw.constants.events.ACTIONABLE, onActionableChange);
       };
     }
-  }, [map, onDrawChange]);
+  }, [map, onDrawChange, onModeChange, onActionableChange]);
 
   useEffect(() => {
     if (editMode) {

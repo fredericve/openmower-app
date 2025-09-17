@@ -29,7 +29,7 @@ export function AreaSettingsDialog({open, onClose}: AreaSettingsDialogProps) {
   const draw = useMapboxDraw();
   const selectedIds = useMapSelection();
   const [name, setName] = useState('');
-  const [type, setType] = useState<AreaProps['type']>('mow');
+  const [type, setType] = useState<AreaProps['type']>('draft');
   const [active, setActive] = useState(true);
 
   // Initialize form values when dialog opens or selected area changes
@@ -37,9 +37,9 @@ export function AreaSettingsDialog({open, onClose}: AreaSettingsDialogProps) {
     if (selectedIds.length === 0 || !draw) return;
     const selectedArea = draw!.get(selectedIds[0]);
     const properties = selectedArea!.properties! as AreaProps;
-    setName(properties.name);
-    setType(properties.type);
-    setActive(properties.active);
+    setName(properties.name ?? '');
+    setType(properties.type ?? 'draft');
+    setActive(properties.active ?? true);
   }, [draw, selectedIds]);
 
   const handleSave = () => {
@@ -90,6 +90,7 @@ export function AreaSettingsDialog({open, onClose}: AreaSettingsDialogProps) {
           fullWidth
           margin="normal"
           variant="outlined"
+          required
         />
 
         <FormControl fullWidth margin="normal">
@@ -105,6 +106,7 @@ export function AreaSettingsDialog({open, onClose}: AreaSettingsDialogProps) {
             <MenuItem value="mow">Mowing Area</MenuItem>
             <MenuItem value="nav">Navigation Area</MenuItem>
             <MenuItem value="obstacle">Obstacle</MenuItem>
+            <MenuItem value="draft">Draft</MenuItem>
           </Select>
         </FormControl>
 
@@ -116,7 +118,7 @@ export function AreaSettingsDialog({open, onClose}: AreaSettingsDialogProps) {
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
-        <Button onClick={handleSave} variant="contained">
+        <Button onClick={handleSave} variant="contained" disabled={name === ''}>
           Save
         </Button>
       </DialogActions>

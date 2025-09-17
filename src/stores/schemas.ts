@@ -44,7 +44,7 @@ const areaSchema = z.object({
   id: z.string(),
   properties: z.object({
     name: z.string(),
-    type: z.enum(['mow', 'nav', 'obstacle']).optional(),
+    type: z.enum(['mow', 'nav', 'obstacle', 'draft']).default('draft'),
     active: z.boolean().default(true),
   }),
   outline: polygonSchema,

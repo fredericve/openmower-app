@@ -1,4 +1,4 @@
-import MapboxDraw from '@mapbox/mapbox-gl-draw';
+import MapboxDraw, {type DrawMode} from '@mapbox/mapbox-gl-draw';
 import {Feature, FeatureCollection} from 'geojson';
 import {useMap as useMapLibreMap} from 'maplibre-react-components';
 import {createContext, Dispatch, SetStateAction, useContext, useEffect, useState} from 'react';
@@ -10,6 +10,10 @@ interface MapContextType {
   setFeatures: Updater<FeatureCollection>;
   editMode: boolean;
   setEditMode: Dispatch<SetStateAction<boolean>>;
+  drawMode: DrawMode;
+  setDrawMode: Dispatch<SetStateAction<DrawMode>>;
+  trashEnabled: boolean;
+  setTrashEnabled: Dispatch<SetStateAction<boolean>>;
 }
 
 export const MapContext = createContext<MapContextType | undefined>(undefined);
@@ -17,7 +21,15 @@ export const MapContext = createContext<MapContextType | undefined>(undefined);
 export const MapContextProvider = ({id, children}: {id: string; children: React.ReactNode}) => {
   const [features, setFeatures] = useImmer<FeatureCollection>({type: 'FeatureCollection', features: []});
   const [editMode, setEditMode] = useState(false);
-  return <MapContext value={{id, features, setFeatures, editMode, setEditMode}}>{children}</MapContext>;
+  const [drawMode, setDrawMode] = useState<DrawMode>(MapboxDraw.constants.modes.STATIC);
+  const [trashEnabled, setTrashEnabled] = useState(false);
+  return (
+    <MapContext
+      value={{id, features, setFeatures, editMode, setEditMode, drawMode, setDrawMode, trashEnabled, setTrashEnabled}}
+    >
+      {children}
+    </MapContext>
+  );
 };
 
 export function useMapContext() {

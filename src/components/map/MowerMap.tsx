@@ -37,9 +37,10 @@ interface MowerMapProps {
 }
 
 export function MowerMap({mapData, sx}: MowerMapProps) {
-  const {id, editMode, features} = useMapContext();
+  const {id, editMode, features, drawMode, trashEnabled} = useMapContext();
   const draw = useMapboxDraw();
   const selectedIds = useMapSelection();
+  const isDrawing = drawMode === MapboxDraw.constants.modes.DRAW_POLYGON;
   const areas = useMemo(
     () => features.features.filter((feature) => feature.geometry.type === 'Polygon') as Feature<Polygon, AreaProps>[],
     [features],
@@ -87,10 +88,8 @@ export function MowerMap({mapData, sx}: MowerMapProps) {
           }}
           // styles={[...splitPolygonDrawStyles(MapboxDraw.lib.theme)]}
           defaultMode={editMode ? 'simple_select' : 'static'}
-          // onCreate={onUpdate}
-          // onUpdate={onUpdate}
-          // onDelete={onDelete}
           userProperties={true}
+          onFeaturesCreated={() => setShowSettings(true)}
         />
         <ControlButton
           position="top-left"
@@ -104,12 +103,24 @@ export function MowerMap({mapData, sx}: MowerMapProps) {
           position="top-left"
           icon={Trash2Icon}
           title="Delete"
-          disabled={selectedIds.length === 0}
+          disabled={!trashEnabled || isDrawing}
           onClick={() => {
             draw?.trash();
           }}
         />
-        <ControlButton position="top-left" icon={PencilLineIcon} title="Draw new area" onClick={() => {}} />
+        <ControlButton
+          position="top-left"
+          icon={PencilLineIcon}
+          title="Draw new area"
+          active={isDrawing}
+          onClick={() => {
+            if (isDrawing) {
+              draw?.trash();
+            } else {
+              draw?.changeMode(MapboxDraw.constants.modes.DRAW_POLYGON);
+            }
+          }}
+        />
         <ControlButton spaced={true} position="top-left" icon={SquaresUniteIcon} title="Merge" onClick={() => {}} />
         <ControlButton position="top-left" icon={SquaresSubtractIcon} title="Call Split" onClick={() => {}} />
         <ControlButton
