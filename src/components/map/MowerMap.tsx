@@ -26,7 +26,7 @@ import {
 import type {Map} from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import {RFullscreenControl, RMap} from 'maplibre-react-components';
-import {useCallback, useMemo, useRef, useState} from 'react';
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {AreaSettingsDialog} from './AreaSettingsDialog';
 import AreasList from './AreasList';
 import ControlButton from './ControlButton';
@@ -65,12 +65,19 @@ export function MowerMap({mapData, sx}: MowerMapProps) {
     }
   }, [features, mapData.datum]);
 
-  const fitToBounds = useCallback(() => {
-    mapRef.current?.fitBounds(bounds, {
-      padding: {top: 10, bottom: 10, left: 60, right: showAreaList ? 470 : 10},
-      duration: 1000,
-    });
-  }, [bounds, showAreaList]);
+  const fitToBounds = useCallback(
+    (immediate: boolean = false) => {
+      mapRef.current?.fitBounds(bounds, {
+        padding: {top: 10, bottom: 10, left: 60, right: showAreaList ? 470 : 10},
+        duration: immediate ? 0 : 1000,
+      });
+    },
+    [bounds, showAreaList],
+  );
+
+  useEffect(() => {
+    fitToBounds(true);
+  }, [fitToBounds, mapData]);
 
   return (
     <Box sx={{...sx, overflow: 'hidden', position: 'relative'}}>
@@ -83,7 +90,6 @@ export function MowerMap({mapData, sx}: MowerMapProps) {
         mapStyle={mapStyles[showSatelliteLayer ? 'satellite' : 'white']}
         initialAttributionControl={false}
         maxZoom={24}
-        initialBounds={bounds}
       >
         <DrawControl
           displayControlsDefault={false}
@@ -163,7 +169,7 @@ export function MowerMap({mapData, sx}: MowerMapProps) {
 
         {/* Right controls */}
         <RFullscreenControl />
-        <ControlButton position="top-right" icon={FocusIcon} title="Fit to bounds" onClick={fitToBounds} />
+        <ControlButton position="top-right" icon={FocusIcon} title="Fit to bounds" onClick={() => fitToBounds()} />
         <ControlButton
           position="top-right"
           title="Toggle satellite layer"
