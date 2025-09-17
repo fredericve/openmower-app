@@ -9,8 +9,11 @@ import {Box, Dialog, useMediaQuery, useTheme, type SxProps} from '@mui/material'
 import bbox from '@turf/bbox';
 import type {Feature, Polygon} from 'geojson';
 import {
+  CircleXIcon,
   LayoutListIcon,
+  PencilIcon,
   PencilLineIcon,
+  SaveIcon,
   ScissorsLineDashedIcon,
   Settings2Icon,
   SquaresIntersectIcon,
@@ -37,7 +40,7 @@ interface MowerMapProps {
 }
 
 export function MowerMap({mapData, sx}: MowerMapProps) {
-  const {id, editMode, features, drawMode, trashEnabled} = useMapContext();
+  const {id, editMode, setEditMode, features, drawMode, trashEnabled} = useMapContext();
   const draw = useMapboxDraw();
   const selectedIds = useMapSelection();
   const isDrawing = drawMode === MapboxDraw.constants.modes.DRAW_POLYGON;
@@ -91,45 +94,68 @@ export function MowerMap({mapData, sx}: MowerMapProps) {
           userProperties={true}
           onFeaturesCreated={() => setShowSettings(true)}
         />
-        <ControlButton
-          position="top-left"
-          icon={Settings2Icon}
-          title="Settings"
-          active={showSettings}
-          disabled={selectedIds.length != 1}
-          onClick={() => setShowSettings(true)}
-        />
-        <ControlButton
-          position="top-left"
-          icon={Trash2Icon}
-          title="Delete"
-          disabled={!trashEnabled || isDrawing}
-          onClick={() => {
-            draw?.trash();
-          }}
-        />
-        <ControlButton
-          position="top-left"
-          icon={PencilLineIcon}
-          title="Draw new area"
-          active={isDrawing}
-          onClick={() => {
-            if (isDrawing) {
-              draw?.trash();
-            } else {
-              draw?.changeMode(MapboxDraw.constants.modes.DRAW_POLYGON);
-            }
-          }}
-        />
-        <ControlButton spaced={true} position="top-left" icon={SquaresUniteIcon} title="Merge" onClick={() => {}} />
-        <ControlButton position="top-left" icon={SquaresSubtractIcon} title="Call Split" onClick={() => {}} />
-        <ControlButton
-          position="top-left"
-          icon={SquaresIntersectIcon}
-          title="Remove overlapping areas"
-          onClick={() => {}}
-        />
-        <ControlButton position="top-left" icon={ScissorsLineDashedIcon} title="Split area" onClick={() => {}} />{' '}
+        {editMode ? (
+          <>
+            <ControlButton
+              position="top-left"
+              icon={SaveIcon}
+              title="Save"
+              style={{color: theme.palette.success.main}}
+              onClick={() => setEditMode(false)}
+            />
+            <ControlButton
+              position="top-left"
+              icon={CircleXIcon}
+              title="Cancel"
+              style={{color: theme.palette.error.main}}
+              onClick={() => setEditMode(false)}
+            />
+            <ControlButton
+              position="top-left"
+              icon={Settings2Icon}
+              title="Settings"
+              active={showSettings}
+              disabled={selectedIds.length != 1}
+              onClick={() => setShowSettings(true)}
+              spaced={true}
+            />
+            <ControlButton
+              position="top-left"
+              icon={Trash2Icon}
+              title="Delete"
+              disabled={!trashEnabled || isDrawing}
+              onClick={() => {
+                draw?.trash();
+              }}
+            />
+            <ControlButton
+              position="top-left"
+              icon={PencilLineIcon}
+              title="Draw new area"
+              active={isDrawing}
+              onClick={() => {
+                if (isDrawing) {
+                  draw?.trash();
+                } else {
+                  draw?.changeMode(MapboxDraw.constants.modes.DRAW_POLYGON);
+                }
+              }}
+            />
+            <ControlButton spaced={true} position="top-left" icon={SquaresUniteIcon} title="Merge" onClick={() => {}} />
+            <ControlButton position="top-left" icon={SquaresSubtractIcon} title="Call Split" onClick={() => {}} />
+            <ControlButton
+              position="top-left"
+              icon={SquaresIntersectIcon}
+              title="Remove overlapping areas"
+              onClick={() => {}}
+            />
+            <ControlButton position="top-left" icon={ScissorsLineDashedIcon} title="Split area" onClick={() => {}} />{' '}
+          </>
+        ) : (
+          <>
+            <ControlButton position="top-left" icon={PencilIcon} title="Edit mode" onClick={() => setEditMode(true)} />
+          </>
+        )}
         <ControlButton
           position="top-right"
           icon={LayoutListIcon}
