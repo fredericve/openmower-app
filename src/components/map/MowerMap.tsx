@@ -27,6 +27,7 @@ import type {Map} from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import {RFullscreenControl, RMap} from 'maplibre-react-components';
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {shallow} from 'zustand/vanilla/shallow';
 import {AreaSettingsDialog} from './AreaSettingsDialog';
 import AreasList from './AreasList';
 import ControlButton from './ControlButton';
@@ -50,34 +51,38 @@ export function MowerMap({mapData, sx}: MowerMapProps) {
     () => features.features.filter((feature) => feature.geometry.type === 'Polygon') as Feature<Polygon, AreaProps>[],
     [features],
   );
+  const bounds = useRef<BBox>(null);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [showAreaList, setShowAreaList] = useState(!isMobile);
   const [showSettings, setShowSettings] = useState(false);
   const [showSatelliteLayer, setShowSatelliteLayer] = useState(false);
 
-  const bounds = useMemo(() => {
-    if (features.features.length > 0) {
-      return bbox(features) as BBox;
-    } else {
-      const {long, lat} = mapData.datum ?? {lat: 48.0, long: 11.0};
-      return [long, lat, long, lat] as BBox;
-    }
-  }, [features, mapData.datum]);
-
   const fitToBounds = useCallback(
     (immediate: boolean = false) => {
-      mapRef.current?.fitBounds(bounds, {
+      if (!mapRef.current || !bounds.current) return;
+      mapRef.current.fitBounds(bounds.current, {
         padding: {top: 10, bottom: 10, left: 60, right: showAreaList ? 390 : 60},
         duration: immediate ? 0 : 1000,
       });
     },
-    [bounds, showAreaList],
+    [showAreaList],
   );
 
   useEffect(() => {
-    fitToBounds(true);
-  }, [fitToBounds, mapData]);
+    if (!mapRef.current) return;
+    const prevBounds = bounds.current;
+    if (features.features.length > 0) {
+      bounds.current = bbox(features) as BBox;
+    } else {
+      const {long, lat} = mapData.datum ?? {lat: 48.0, long: 11.0};
+      bounds.current = [long, lat, long, lat] as BBox;
+    }
+    // If the bounds have changed, fit to bounds (except in edit mode).
+    if (!prevBounds || (!editMode && !shallow(prevBounds, bounds.current))) {
+      fitToBounds(true);
+    }
+  }, [features, mapData.datum, editMode, fitToBounds]);
 
   return (
     <Box sx={{...sx, overflow: 'hidden', position: 'relative'}}>
