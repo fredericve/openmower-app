@@ -17,14 +17,10 @@ import {
   TextField,
 } from '@mui/material';
 import {useEffect, useState} from 'react';
+import {AsyncDialogProps} from 'react-dialog-async';
 import MapDialog from '../MapDialog';
 
-interface AreaSettingsDialogProps {
-  open: boolean;
-  onClose: () => void;
-}
-
-export function AreaSettingsDialog({open, onClose}: AreaSettingsDialogProps) {
+export function AreaSettingsDialog({open, handleClose}: AsyncDialogProps) {
   const map = useMap();
   const draw = useMapboxDraw();
   const selectedIds = useMapSelection();
@@ -54,7 +50,7 @@ export function AreaSettingsDialog({open, onClose}: AreaSettingsDialogProps) {
     draw.add(feature);
     map.fire(MapboxDraw.constants.events.UPDATE, {features: [feature]});
 
-    onClose();
+    handleClose();
   };
 
   if (selectedIds.length === 0) {
@@ -62,7 +58,7 @@ export function AreaSettingsDialog({open, onClose}: AreaSettingsDialogProps) {
   }
 
   return (
-    <MapDialog open={open} onClose={onClose} fullWidth maxWidth="xs">
+    <MapDialog open={open} onClose={() => handleClose()} fullWidth maxWidth="xs">
       <DialogTitle>Area Settings</DialogTitle>
       <DialogContent>
         <TextField
@@ -99,7 +95,7 @@ export function AreaSettingsDialog({open, onClose}: AreaSettingsDialogProps) {
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
+        <Button onClick={() => handleClose()}>Cancel</Button>
         <Button onClick={handleSave} variant="contained" disabled={name === ''}>
           Save
         </Button>

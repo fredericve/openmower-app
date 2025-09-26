@@ -1,31 +1,14 @@
 'use client';
 
-import {useMapboxDraw, useMapContext, useMapSelection} from '@/contexts/MapContext';
+import {useMapContext} from '@/contexts/MapContext';
 import {MapData, type AreaProps} from '@/stores/schemas';
-import {removeMiniCoords} from '@/utils/area-utils';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import StaticMode from '@mapbox/mapbox-gl-draw-static-mode';
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 import {Box, Dialog, useMediaQuery, useTheme, type SxProps} from '@mui/material';
 import bbox from '@turf/bbox';
-import difference from '@turf/difference';
-import {featureCollection} from '@turf/helpers';
-import union from '@turf/union';
-import type {Feature, Geometry, Polygon} from 'geojson';
-import {
-  CircleXIcon,
-  FocusIcon,
-  GlobeIcon,
-  LayoutListIcon,
-  PencilIcon,
-  PencilLineIcon,
-  SaveIcon,
-  ScissorsLineDashedIcon,
-  Settings2Icon,
-  SquaresSubtractIcon,
-  SquaresUniteIcon,
-  Trash2Icon,
-} from 'lucide-react';
+import type {Feature, Polygon} from 'geojson';
+import {FocusIcon, GlobeIcon, LayoutListIcon, PencilIcon} from 'lucide-react';
 import type {Map} from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import {RFullscreenControl, RMap} from 'maplibre-react-components';
@@ -37,8 +20,7 @@ import ControlButton from './ControlButton';
 import {DrawControl} from './DrawControl';
 import {drawStyles} from './drawStyles';
 import {AreaSettingsDialog} from './edit/AreaSettingsDialog';
-import MergeDialog from './edit/MergeDialog';
-import SubtractDialog from './edit/SubtractDialog';
+import EditControls from './edit/EditControls';
 import {mapStyles} from './mapStyles';
 import type {BBox} from './types';
 
@@ -48,57 +30,18 @@ interface MowerMapProps {
 }
 
 export function MowerMap({mapData, sx}: MowerMapProps) {
-  const {id, editMode, setEditMode, features, setFeatures, drawMode, trashEnabled} = useMapContext();
+  const {id, editMode, setEditMode, features} = useMapContext();
   const mapRef = useRef<Map>(null);
-  const draw = useMapboxDraw();
-  const selectedIds = useMapSelection();
-  const isDrawing = drawMode === MapboxDraw.constants.modes.DRAW_POLYGON;
   const areas = useMemo(
     () => features.features.filter((feature) => feature.geometry.type === 'Polygon') as Feature<Polygon, AreaProps>[],
     [features],
   );
-  const selectedAreas = areas.filter((area) => selectedIds.includes(area.id as string));
   const bounds = useRef<BBox>(null);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [showAreaList, setShowAreaList] = useState(!isMobile);
-  const [showSettings, setShowSettings] = useState(false);
   const [showSatelliteLayer, setShowSatelliteLayer] = useState(false);
-  const mergeDialog = useDialog(MergeDialog);
-  const subtractDialog = useDialog(SubtractDialog);
-
-  const updateAreaGeometry = useCallback(
-    (targetId: string, geometry: Geometry | undefined, removeOtherAreas: boolean = false) => {
-      if (geometry?.type !== 'Polygon') {
-        console.error('New area would not be contiguous');
-        return;
-      }
-      setFeatures((draft) => {
-        draft.features.find((f) => f.id === targetId)!.geometry = geometry;
-        if (removeOtherAreas) {
-          draft.features = draft.features.filter((f) => !selectedIds.includes(f.id as string) || f.id === targetId);
-        }
-        draw?.set(featureCollection(draft.features));
-      });
-    },
-    [setFeatures, selectedIds, draw],
-  );
-
-  const handleMerge = useCallback(async () => {
-    const targetId = await mergeDialog.open({selectedAreas});
-    if (targetId === undefined) return;
-    const result = removeMiniCoords(union(featureCollection(selectedAreas)));
-    updateAreaGeometry(targetId, result?.geometry, true);
-  }, [mergeDialog, selectedAreas, updateAreaGeometry]);
-
-  const handleSubtract = useCallback(async () => {
-    const [targetId, keepAllAreas] = (await subtractDialog.open({selectedAreas})) ?? [undefined, false];
-    if (targetId === undefined) return;
-    const targetArea = selectedAreas.find((area) => area.id === targetId)!;
-    const otherAreas = selectedAreas.filter((area) => area.id !== targetId);
-    const result = removeMiniCoords(difference(featureCollection([targetArea, ...otherAreas])));
-    updateAreaGeometry(targetId, result?.geometry, !keepAllAreas);
-  }, [subtractDialog, selectedAreas, updateAreaGeometry]);
+  const areaSettingsDialog = useDialog(AreaSettingsDialog);
 
   const fitToBounds = useCallback(
     (immediate: boolean = false) => {
@@ -148,77 +91,13 @@ export function MowerMap({mapData, sx}: MowerMapProps) {
           // styles={[...splitPolygonDrawStyles(MapboxDraw.lib.theme)]}
           defaultMode={editMode ? 'simple_select' : 'static'}
           userProperties={true}
-          onFeaturesCreated={() => setShowSettings(true)}
+          onFeaturesCreated={() => areaSettingsDialog.open()}
         />
         {/* Left controls */}
         {editMode ? (
-          <>
-            <ControlButton
-              position="top-left"
-              icon={SaveIcon}
-              title="Save"
-              style={{color: theme.palette.success.main}}
-              onClick={() => setEditMode(false)}
-            />
-            <ControlButton
-              position="top-left"
-              icon={CircleXIcon}
-              title="Cancel"
-              style={{color: theme.palette.error.main}}
-              onClick={() => setEditMode(false)}
-            />
-            <ControlButton
-              position="top-left"
-              icon={Settings2Icon}
-              title="Settings"
-              active={showSettings}
-              disabled={selectedIds.length != 1}
-              onClick={() => setShowSettings(true)}
-              spaced={true}
-            />
-            <ControlButton
-              position="top-left"
-              icon={Trash2Icon}
-              title="Delete"
-              disabled={!trashEnabled || isDrawing}
-              onClick={() => {
-                draw?.trash();
-              }}
-            />
-            <ControlButton
-              position="top-left"
-              icon={PencilLineIcon}
-              title="Draw new area"
-              active={isDrawing}
-              onClick={() => {
-                if (isDrawing) {
-                  draw?.trash();
-                } else {
-                  draw?.changeMode(MapboxDraw.constants.modes.DRAW_POLYGON);
-                }
-              }}
-            />
-            <ControlButton
-              spaced={true}
-              position="top-left"
-              icon={SquaresUniteIcon}
-              title="Merge"
-              disabled={selectedIds.length < 2}
-              onClick={handleMerge}
-            />
-            <ControlButton
-              position="top-left"
-              icon={SquaresSubtractIcon}
-              title="Subtract"
-              disabled={selectedIds.length < 2}
-              onClick={handleSubtract}
-            />
-            <ControlButton position="top-left" icon={ScissorsLineDashedIcon} title="Split area" onClick={() => {}} />{' '}
-          </>
+          <EditControls areas={areas} />
         ) : (
-          <>
-            <ControlButton position="top-left" icon={PencilIcon} title="Edit mode" onClick={() => setEditMode(true)} />
-          </>
+          <ControlButton position="top-left" icon={PencilIcon} title="Edit mode" onClick={() => setEditMode(true)} />
         )}
 
         {/* Right controls */}
@@ -273,7 +152,6 @@ export function MowerMap({mapData, sx}: MowerMapProps) {
             <AreasList areas={areas} />
           </Dialog>
         )}
-        <AreaSettingsDialog open={showSettings} onClose={() => setShowSettings(false)} />
         <DialogOutlet />
       </RMap>
     </Box>
