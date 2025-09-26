@@ -32,14 +32,14 @@ import {RFullscreenControl, RMap} from 'maplibre-react-components';
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {DialogOutlet, useDialog} from 'react-dialog-async';
 import {shallow} from 'zustand/vanilla/shallow';
-import {AreaSettingsDialog} from './AreaSettingsDialog';
 import AreasList from './AreasList';
 import ControlButton from './ControlButton';
 import {DrawControl} from './DrawControl';
 import {drawStyles} from './drawStyles';
+import {AreaSettingsDialog} from './edit/AreaSettingsDialog';
+import MergeDialog from './edit/MergeDialog';
+import SubtractDialog from './edit/SubtractDialog';
 import {mapStyles} from './mapStyles';
-import MergeDialog from './MergeDialog';
-import SubtractDialog from './SubtractDialog';
 import type {BBox} from './types';
 
 interface MowerMapProps {

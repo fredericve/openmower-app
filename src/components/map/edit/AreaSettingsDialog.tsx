@@ -17,7 +17,7 @@ import {
   TextField,
 } from '@mui/material';
 import {useEffect, useState} from 'react';
-import MapDialog from './MapDialog';
+import MapDialog from '../MapDialog';
 
 interface AreaSettingsDialogProps {
   open: boolean;

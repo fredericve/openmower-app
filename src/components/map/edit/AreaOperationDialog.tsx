@@ -2,8 +2,8 @@ import {AreaProps} from '@/stores/schemas';
 import theme from '@/theme';
 import {Box, Button, DialogActions, DialogContent, List} from '@mui/material';
 import {Feature, Polygon} from 'geojson';
-import AreaItem from './AreaItem';
-import MapDialog from './MapDialog';
+import AreaItem from '../AreaItem';
+import MapDialog from '../MapDialog';
 
 export function AreaOperationDialog<Response = undefined>({
   open,

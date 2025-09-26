@@ -7,7 +7,7 @@ import {restrictToFirstScrollableAncestor, restrictToVerticalAxis} from '@dnd-ki
 import {arrayMove, SortableContext, verticalListSortingStrategy} from '@dnd-kit/sortable';
 import {Card, CardContent, CardHeader, List} from '@mui/material';
 import {Feature, Polygon} from 'geojson';
-import SortableAreaItem from './SortableAreaItem';
+import SortableAreaItem from './edit/SortableAreaItem';
 
 export default function AreasList({areas}: {areas: Feature<Polygon, AreaProps>[]}) {
   const selectedIds = useMapSelection();
