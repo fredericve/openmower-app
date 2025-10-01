@@ -1,13 +1,16 @@
 'use client';
 
-import {useMapContext} from '@/contexts/MapContext';
+import {useMapboxDraw, useMapContext} from '@/contexts/MapContext';
 import {MapData, type AreaProps} from '@/stores/schemas';
+import type {AreaFeature} from '@/types/geojson';
+import {generateId, splitPolygonWithLine} from '@/utils/area-utils';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import StaticMode from '@mapbox/mapbox-gl-draw-static-mode';
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 import {Box, Dialog, useMediaQuery, useTheme, type SxProps} from '@mui/material';
 import bbox from '@turf/bbox';
-import type {Feature, Polygon} from 'geojson';
+import {featureCollection} from '@turf/helpers';
+import type {Feature, LineString, Polygon} from 'geojson';
 import {FocusIcon, GlobeIcon, LayoutListIcon, PencilIcon} from 'lucide-react';
 import type {Map} from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
@@ -30,8 +33,9 @@ interface MowerMapProps {
 }
 
 export function MowerMap({mapData, sx}: MowerMapProps) {
-  const {id, editMode, setEditMode, features} = useMapContext();
+  const {id, editMode, setEditMode, features, setFeatures, drawWorkflow, setDrawWorkflow} = useMapContext();
   const mapRef = useRef<Map>(null);
+  const draw = useMapboxDraw();
   const areas = useMemo(
     () => features.features.filter((feature) => feature.geometry.type === 'Polygon') as Feature<Polygon, AreaProps>[],
     [features],
@@ -69,6 +73,32 @@ export function MowerMap({mapData, sx}: MowerMapProps) {
     }
   }, [features, mapData.datum, editMode, fitToBounds]);
 
+  const handleFeaturesCreated = useCallback(
+    (createdFeatures: Feature[]) => {
+      if (drawWorkflow?.type === 'split_polygon') {
+        draw?.delete(createdFeatures.map((feature) => feature.id as string));
+        const areaIdx = features.features.findIndex((feature) => feature.id === drawWorkflow.areaId);
+        const area = features.features[areaIdx] as AreaFeature;
+        const newAreas = splitPolygonWithLine(area, createdFeatures[0] as Feature<LineString>);
+        if (newAreas.length >= 2) {
+          for (const [index, newArea] of newAreas.entries()) {
+            newArea.id = generateId();
+            newArea.properties = JSON.parse(JSON.stringify(area.properties)) as AreaProps;
+            newArea.properties.name += ` (${index + 1})`;
+          }
+          draw?.delete(drawWorkflow.areaId).add(featureCollection(newAreas));
+          setFeatures((draft) => {
+            draft.features.splice(areaIdx, 1, ...newAreas);
+          });
+        }
+        setDrawWorkflow(null);
+      } else {
+        areaSettingsDialog.open();
+      }
+    },
+    [areaSettingsDialog, draw, drawWorkflow, setDrawWorkflow, features, setFeatures],
+  );
+
   return (
     <Box sx={{...sx, overflow: 'hidden', position: 'relative'}}>
       <RMap
@@ -88,10 +118,9 @@ export function MowerMap({mapData, sx}: MowerMapProps) {
             ...MapboxDraw.modes,
             static: StaticMode,
           }}
-          // styles={[...splitPolygonDrawStyles(MapboxDraw.lib.theme)]}
           defaultMode={editMode ? 'simple_select' : 'static'}
           userProperties={true}
-          onFeaturesCreated={() => areaSettingsDialog.open()}
+          onFeaturesCreated={handleFeaturesCreated}
         />
         {/* Left controls */}
         {editMode ? (

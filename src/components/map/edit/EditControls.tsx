@@ -25,7 +25,7 @@ import MergeDialog from './MergeDialog';
 import SubtractDialog from './SubtractDialog';
 
 export default function EditControls({areas}: {areas: AreaFeature[]}) {
-  const {setEditMode, trashEnabled, setFeatures, drawMode} = useMapContext();
+  const {setEditMode, trashEnabled, setFeatures, drawMode, setDrawWorkflow} = useMapContext();
   const draw = useMapboxDraw();
   const selectedIds = useMapSelection();
   const selectedAreas = areas.filter((area) => selectedIds.includes(area.id as string));
@@ -66,6 +66,11 @@ export default function EditControls({areas}: {areas: AreaFeature[]}) {
     const result = removeMiniCoords(difference(featureCollection([targetArea, ...otherAreas])));
     updateAreaGeometry(targetId, result?.geometry, !keepAllAreas);
   }, [subtractDialog, selectedAreas, updateAreaGeometry]);
+
+  const handleSplit = useCallback(async () => {
+    setDrawWorkflow({type: 'split_polygon', areaId: selectedIds[0]});
+    draw?.changeMode(MapboxDraw.constants.modes.DRAW_LINE_STRING);
+  }, [setDrawWorkflow, selectedIds, draw]);
 
   return (
     <>
@@ -129,7 +134,13 @@ export default function EditControls({areas}: {areas: AreaFeature[]}) {
         disabled={selectedIds.length < 2}
         onClick={handleSubtract}
       />
-      <ControlButton position="top-left" icon={ScissorsLineDashedIcon} title="Split area" onClick={() => {}} />
+      <ControlButton
+        position="top-left"
+        icon={ScissorsLineDashedIcon}
+        title="Split area"
+        disabled={selectedIds.length !== 1}
+        onClick={handleSplit}
+      />
     </>
   );
 }

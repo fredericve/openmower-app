@@ -1,5 +1,5 @@
+import {generateId} from '@/utils/area-utils';
 import mqtt, {MqttClient} from 'mqtt';
-import {customAlphabet} from 'nanoid/non-secure';
 import {create, useStore} from 'zustand';
 import {immer} from 'zustand/middleware/immer';
 import {useConfigStore} from './configStore';
@@ -31,8 +31,6 @@ interface MowersStore {
   selected: number;
   loadMowers: () => void;
 }
-
-const nanoid = customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 32);
 
 export const useMowersStore = create<MowersStore>()(
   immer((set, get) => ({
@@ -117,7 +115,7 @@ const convertLegacyMap = (legacy: LegacyMapData) => ({
 const convertLegacyAreas = (areas: LegacyArea[], type: AreaType, prefix: string): Area[] =>
   areas.flatMap((area, idx) => [
     {
-      id: nanoid(),
+      id: generateId(),
       properties: {
         name: area.name === '' ? `${prefix} ${idx}` : area.name,
         type: type,
@@ -126,7 +124,7 @@ const convertLegacyAreas = (areas: LegacyArea[], type: AreaType, prefix: string)
       outline: area.outline,
     },
     ...(area.obstacles ?? []).map((obstacle) => ({
-      id: nanoid(),
+      id: generateId(),
       properties: {
         name: 'Obstacle',
         type: 'obstacle' as const,

@@ -1,7 +1,16 @@
 import {AreaProps} from '@/stores/schemas';
 import {area as turfArea} from '@turf/area';
-import {multiPolygon, polygon} from '@turf/helpers';
-import {Feature, Polygon, type MultiPolygon} from 'geojson';
+import {booleanPointInPolygon} from '@turf/boolean-point-in-polygon';
+import {featureCollection, lineString, multiPolygon, polygon} from '@turf/helpers';
+import {nearestPointOnLine} from '@turf/nearest-point-on-line';
+import {pointOnFeature} from '@turf/point-on-feature';
+import {polygonToLine} from '@turf/polygon-to-line';
+import {polygonize} from '@turf/polygonize';
+import {Feature, Polygon, type LineString, type MultiPolygon, type Position} from 'geojson';
+import {customAlphabet} from 'nanoid';
+import sweeplineIntersections from 'sweepline-intersections';
+
+export const generateId = customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 32);
 
 export const getBiggestArea = (areas: Feature<Polygon, AreaProps>[]) => {
   if (areas.length === 0) return null;
@@ -25,4 +34,36 @@ export const removeMiniCoords = (feature: Feature<Polygon | MultiPolygon> | null
   } else {
     return multiPolygon(filteredCoords);
   }
+};
+
+const insertPointsOnLine = (line: Feature<LineString>, points: Position[]) => {
+  let newLine = line;
+  for (const point of points) {
+    const snapped = nearestPointOnLine(newLine, point);
+    newLine = lineString(newLine.geometry.coordinates.toSpliced(snapped.properties.index + 1, 0, point));
+  }
+  return newLine;
+};
+
+export const splitPolygonWithLine = (
+  polygon: Feature<Polygon>,
+  cutterLine: Feature<LineString>,
+): Feature<Polygon>[] => {
+  if (polygon.geometry.coordinates.length !== 1) {
+    throw new Error('Splitting is only implemented for polygons without holes');
+  }
+
+  const polygonLine = polygonToLine(polygon) as Feature<LineString>;
+
+  const intersections: Position[] = sweeplineIntersections(featureCollection([polygonLine, cutterLine]), true);
+  const lines = featureCollection([
+    insertPointsOnLine(polygonLine, intersections),
+    insertPointsOnLine(cutterLine, intersections),
+  ]);
+
+  const candidatePolys = polygonize(lines);
+  const insidePolys = candidatePolys.features.filter((candidate) =>
+    booleanPointInPolygon(pointOnFeature(candidate), polygon),
+  );
+  return insidePolys.length >= 2 ? insidePolys : [polygon];
 };

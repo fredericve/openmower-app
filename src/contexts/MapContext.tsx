@@ -12,9 +12,18 @@ interface MapContextType {
   setEditMode: Dispatch<SetStateAction<boolean>>;
   drawMode: DrawMode;
   setDrawMode: Dispatch<SetStateAction<DrawMode>>;
+  drawWorkflow: Workflow | null;
+  setDrawWorkflow: Updater<Workflow | null>;
   trashEnabled: boolean;
   setTrashEnabled: Dispatch<SetStateAction<boolean>>;
 }
+
+interface SplitPolygonWorkflow {
+  type: 'split_polygon';
+  areaId: string;
+}
+
+type Workflow = SplitPolygonWorkflow;
 
 export const MapContext = createContext<MapContextType | undefined>(undefined);
 
@@ -23,10 +32,23 @@ export const MapContextProvider = ({id, children}: {id: string; children: React.
   const [features, setFeatures] = useImmer<FeatureCollection>({type: 'FeatureCollection', features: []});
   const [editMode, setEditMode] = useState(false);
   const [drawMode, setDrawMode] = useState<DrawMode>(MapboxDraw.constants.modes.STATIC);
+  const [drawWorkflow, setDrawWorkflow] = useImmer<Workflow | null>(null);
   const [trashEnabled, setTrashEnabled] = useState(false);
   return (
     <MapContext
-      value={{id, features, setFeatures, editMode, setEditMode, drawMode, setDrawMode, trashEnabled, setTrashEnabled}}
+      value={{
+        id,
+        features,
+        setFeatures,
+        editMode,
+        setEditMode,
+        drawMode,
+        setDrawMode,
+        drawWorkflow,
+        setDrawWorkflow,
+        trashEnabled,
+        setTrashEnabled,
+      }}
     >
       {children}
     </MapContext>
