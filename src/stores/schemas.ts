@@ -43,7 +43,7 @@ const polygonSchema = z.array(pointSchema);
 const areaSchema = z.object({
   id: z.string(),
   properties: z.object({
-    name: z.string(),
+    name: z.string().optional(),
     type: z.enum(['mow', 'nav', 'obstacle', 'draft']).default('draft'),
     active: z.boolean().default(true),
   }),
@@ -56,7 +56,7 @@ export type AreaType = AreaProps['type'];
 const dockingStationSchema = z.object({
   id: z.string(),
   properties: z.object({
-    name: z.string(),
+    name: z.string().optional(),
     active: z.boolean().default(true),
   }),
   position: pointSchema,
