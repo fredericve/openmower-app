@@ -92,7 +92,8 @@ export const useMowersStore = create<MowersStore>()(
             } else if (partialTopic === 'map/json') {
               set((state) => {
                 const json = JSON.parse(payload.toString());
-                state.mowers[idx].map = convertLegacyMap(legacyMapSchema.parse(json));
+                state.mowers[idx].map =
+                  'areas' in json ? mapSchema.parse(json) : convertLegacyMap(legacyMapSchema.parse(json));
               });
             }
           }
