@@ -1,3 +1,4 @@
+import type {MowerConfig} from '@/components/types';
 import {OpenMowerRpc} from '@/lib/rpc';
 import {generateId} from '@/utils/area-utils';
 import mqtt, {MqttClient} from 'mqtt';
@@ -20,16 +21,25 @@ import {
   type State,
 } from './schemas';
 
-interface Mower {
-  id: string;
-  name: string;
-  description: string;
-  mqttClient: MqttClient;
-  mqttPrefix: string;
-  rpc: OpenMowerRpc;
-  capabilities: Capabilities;
-  state: State;
-  map: MapData;
+class Mower {
+  readonly id: string;
+  readonly name: string;
+  readonly description: string;
+  readonly mqttClient: MqttClient;
+  readonly mqttPrefix: string;
+  readonly rpc: OpenMowerRpc;
+  capabilities: Capabilities = {};
+  state: State = stateDefaults;
+  map: MapData = mapDefaults;
+
+  constructor(config: MowerConfig, mqttClient: MqttClient) {
+    this.id = config.id;
+    this.name = config.name;
+    this.description = config.description;
+    this.mqttClient = mqttClient;
+    this.mqttPrefix = config.mqtt_prefix;
+    this.rpc = new OpenMowerRpc(mqttClient, config.mqtt_prefix);
+  }
 }
 
 interface MowersStore {
@@ -60,18 +70,7 @@ export const useMowersStore = create<MowersStore>()(
         const clientMowers: {prefix: string; idx: number}[] = [];
         for (const config of mowerConfigs) {
           if (config.mqtt_ws_url === url) {
-            const rpc = new OpenMowerRpc(client, config.mqtt_prefix);
-            const mower = {
-              id: config.id,
-              name: config.name,
-              description: config.description,
-              mqttClient: client,
-              mqttPrefix: config.mqtt_prefix,
-              rpc,
-              capabilities: {},
-              state: stateDefaults,
-              map: mapDefaults,
-            };
+            const mower = new Mower(config, client);
             mowers.push(mower);
             clientMowers.push({prefix: mower.mqttPrefix, idx: mowers.length - 1});
           }
