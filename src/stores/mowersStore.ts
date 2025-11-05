@@ -40,6 +40,11 @@ class Mower {
     this.mqttPrefix = config.mqtt_prefix;
     this.rpc = new OpenMowerRpc(mqttClient, config.mqtt_prefix);
   }
+
+  hasCapability(capability: string, minLevel: number = 1): boolean {
+    const level = this.capabilities[capability];
+    return level !== undefined && level >= minLevel;
+  }
 }
 
 interface MowersStore {
