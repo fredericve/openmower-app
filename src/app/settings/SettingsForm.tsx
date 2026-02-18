@@ -6,9 +6,14 @@ import {ExpandMore as ExpandMoreIcon} from '@mui/icons-material';
 import {Accordion, AccordionDetails, AccordionSummary, Box, CircularProgress, Typography} from '@mui/material';
 import {createHeadlessForm} from '@remoteoss/json-schema-form';
 import mergeAllOf from 'json-schema-merge-allof';
+import merge from 'lodash.merge';
 import {useEffect, useState} from 'react';
+import {parse as parseYaml} from 'yaml';
 import {FieldsetField} from './FieldsetField';
 import type {Field, FieldsetField as FieldsetFieldType} from './types';
+
+// TODO: Make this dynamic.
+const RELEVANT_DEFAULTS = ['defaults.yaml', 'boards/v1.yaml', 'mowers/YardForce500.yaml'];
 
 export function SettingsForm() {
   const [fields, setFields] = useState<Field[] | null>(null);
@@ -24,7 +29,14 @@ export function SettingsForm() {
       setError(null);
 
       try {
-        const schema = await rpc.meta.config.schema();
+        const [schema, defaultsFiles] = await Promise.all([rpc.meta.config.schema(), rpc.meta.config.defaults()]);
+        // Parse YAML
+        const defaults = RELEVANT_DEFAULTS.reduce((acc, path) => {
+          const parsed = parseYaml(defaultsFiles[path]);
+          merge(acc, parsed);
+          return acc;
+        }, {});
+        console.log(defaults);
         const dereferencer = new JsonSchemaDereferencer(JSON.parse(schema), {
           recursive: true,
         });
