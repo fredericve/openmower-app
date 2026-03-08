@@ -20,7 +20,7 @@ import {useEffect, useState} from 'react';
 import {AsyncDialogProps} from 'react-dialog-async';
 import MapDialog from '../MapDialog';
 
-export function AreaSettingsDialog({open, handleClose}: AsyncDialogProps) {
+export function AreaSettingsDialog({isOpen, handleClose}: AsyncDialogProps) {
   const map = useMap();
   const draw = useMapboxDraw();
   const selectedIds = useMapSelection();
@@ -58,7 +58,7 @@ export function AreaSettingsDialog({open, handleClose}: AsyncDialogProps) {
   }
 
   return (
-    <MapDialog open={open} onClose={() => handleClose()} fullWidth maxWidth="xs">
+    <MapDialog open={isOpen} onClose={() => handleClose()} fullWidth maxWidth="xs">
       <DialogTitle>Area Settings</DialogTitle>
       <DialogContent>
         <TextField

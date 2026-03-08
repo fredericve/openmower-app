@@ -13,7 +13,7 @@ interface SubtractDialogProps {
 }
 
 export default function SubtractDialog({
-  open,
+  isOpen,
   handleClose,
   data,
 }: AsyncDialogProps<SubtractDialogProps, [string, boolean]>) {
@@ -22,7 +22,7 @@ export default function SubtractDialog({
   const [keepAllAreas, setKeepAllAreas] = useState(true);
   return (
     <AreaOperationDialog
-      open={open}
+      open={isOpen}
       handleClose={handleClose}
       confirmText="Subtract areas"
       response={[targetAreaId, keepAllAreas]}

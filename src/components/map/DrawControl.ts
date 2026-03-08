@@ -9,7 +9,7 @@ import type {
 } from '@mapbox/mapbox-gl-draw';
 import MapboxDraw, {type DrawMode} from '@mapbox/mapbox-gl-draw';
 import type {Feature} from 'geojson';
-import type {ControlPosition} from 'maplibre-gl';
+import type {ControlPosition, IControl} from 'maplibre-gl';
 import {useControl, useMap} from 'maplibre-react-components';
 import {useCallback, useEffect} from 'react';
 
@@ -36,9 +36,9 @@ export function DrawControl({
         setDrawMode(mode);
         return draw;
       };
-      return draw;
+      return draw as unknown as IControl;
     },
-  }) as MapboxDraw;
+  }) as unknown as MapboxDraw;
 
   const onDrawChange = useCallback(
     (e: DrawCreateEvent | DrawUpdateEvent | DrawDeleteEvent) => {
