@@ -1,0 +1,105 @@
+{
+  "$schema": "https://github.com/open-rpc/meta-schema/releases/latest/download/open-rpc-meta-schema.json",
+  "openrpc": "1.3.2",
+  "info": {
+    "version": "1.0.0",
+    "title": "OpenMower"
+  },
+  "methods": [
+    {
+      "name": "rpc.ping",
+      "summary": "Ping the server.",
+      "params": [],
+      "result": {
+        "name": "result",
+        "description": "Returns \"pong\" if successful.",
+        "schema": {
+          "type": "string",
+          "enum": [
+            "pong"
+          ]
+        }
+      }
+    },
+    {
+      "name": "rpc.methods",
+      "summary": "List all available methods.",
+      "params": [],
+      "result": {
+        "name": "methods",
+        "description": "An array of method names (e.g. \"rpc.ping\").",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "map.replace",
+      "summary": "Replace the current map with a new one.",
+      "params": [
+        {
+          "name": "map",
+          "description": "The new map in JSON format",
+          "required": true,
+          "schema": {
+            "type": "object"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "description": "No result is returned if successful.",
+        "schema": {
+          "type": "null"
+        }
+      }
+    },
+    {
+      "name": "meta.rpc.ping",
+      "summary": "Ping the meta server.",
+      "params": [],
+      "result": {
+        "name": "result",
+        "description": "Returns \"pong\" if successful.",
+        "schema": {
+          "type": "string",
+          "enum": [
+            "pong"
+          ]
+        }
+      }
+    },
+    {
+      "name": "meta.config.schema",
+      "summary": "Get the configuration schema.",
+      "params": [],
+      "result": {
+        "name": "result",
+        "description": "Returns the JSON schema for the configuration.",
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    {
+      "name": "meta.config.defaults",
+      "summary": "Get the default configuration values.",
+      "params": [],
+      "result": {
+        "name": "result",
+        "description": "Returns an object where each key is a relative path and the value is the content of a YAML file as a string.",
+        "schema": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "description": "Content of a YAML file as a string"
+          },
+          "description": "Keys are relative file paths, values are YAML file contents as strings"
+        }
+      }
+    }
+  ]
+}
