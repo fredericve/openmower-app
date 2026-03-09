@@ -17,6 +17,7 @@ const constants = MapboxDraw.constants.classes as Record<string, string>;
 constants.CONTROL_BASE = 'maplibregl-ctrl';
 constants.CONTROL_PREFIX = 'maplibregl-ctrl-';
 constants.CONTROL_GROUP = 'maplibregl-ctrl-group';
+constants.CANVAS = 'maplibregl-canvas';
 
 export function DrawControl({
   position = 'top-left',

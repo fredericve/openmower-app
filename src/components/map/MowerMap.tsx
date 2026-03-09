@@ -114,6 +114,7 @@ export function MowerMap({mapData, saveMapToMower, sx}: MowerMapProps) {
       >
         <DrawControl
           displayControlsDefault={false}
+          controls={{trash: true}}
           styles={drawStyles}
           modes={{
             ...MapboxDraw.modes,

@@ -36,6 +36,10 @@ a {
   text-decoration: none;
 }
 
+.mapbox-gl-draw_trash {
+  display: none !important;
+}
+
 .maplibregl-ctrl-top-left .maplibregl-ctrl + .maplibregl-ctrl,
 .maplibregl-ctrl-top-right .maplibregl-ctrl + .maplibregl-ctrl {
   margin-top: 4px !important;
