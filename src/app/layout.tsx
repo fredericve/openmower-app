@@ -48,6 +48,7 @@ export default async function RootLayout({
                     padding: 0,
                     width: '100%',
                     overflow: 'auto',
+                    overflowAnchor: 'none',
                   }}
                 >
                   {children}
