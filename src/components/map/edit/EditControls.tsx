@@ -11,12 +11,14 @@ import type {Geometry} from 'geojson';
 import {
   CircleXIcon,
   PencilLineIcon,
+  Redo2Icon,
   SaveIcon,
   ScissorsLineDashedIcon,
   Settings2Icon,
   SquaresSubtractIcon,
   SquaresUniteIcon,
   Trash2Icon,
+  Undo2Icon,
 } from 'lucide-react';
 import {useCallback} from 'react';
 import {useDialog} from 'react-dialog-async';
@@ -32,7 +34,7 @@ export default function EditControls({
   areas: AreaFeature[];
   saveMapToMower: () => Promise<void>;
 }) {
-  const {setEditMode, trashEnabled, setFeatures, drawMode, setDrawWorkflow, hasUnsavedChanges} = useMapContext();
+  const {setEditMode, trashEnabled, setFeatures, drawMode, setDrawWorkflow, hasUnsavedChanges, canUndo, canRedo, undo, redo} = useMapContext();
   const draw = useMapboxDraw();
   const selectedIds = useMapSelection();
   const selectedAreas = areas.filter((area) => selectedIds.includes(area.id as string));
@@ -109,6 +111,26 @@ export default function EditControls({
         title="Cancel"
         style={{color: theme.palette.error.main}}
         onClick={handleCancel}
+      />
+      <ControlButton
+        position="top-left"
+        icon={Undo2Icon}
+        title="Undo"
+        disabled={!canUndo}
+        onClick={() => {
+          const snapshot = undo();
+          if (snapshot) draw?.set(featureCollection(snapshot.features));
+        }}
+      />
+      <ControlButton
+        position="top-left"
+        icon={Redo2Icon}
+        title="Redo"
+        disabled={!canRedo}
+        onClick={() => {
+          const snapshot = redo();
+          if (snapshot) draw?.set(featureCollection(snapshot.features));
+        }}
       />
       <ControlButton
         position="top-left"

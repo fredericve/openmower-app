@@ -1,11 +1,14 @@
 import MapboxDraw, {type DrawMode} from '@mapbox/mapbox-gl-draw';
-import {Draft} from 'immer';
 import {Feature, FeatureCollection} from 'geojson';
+import {Draft} from 'immer';
 import {useMap as useMapLibreMap} from 'maplibre-react-components';
-import {createContext, Dispatch, SetStateAction, useCallback, useContext, useEffect, useState} from 'react';
+import {createContext, Dispatch, SetStateAction, useCallback, useContext, useEffect, useRef, useState} from 'react';
 import {Updater, useImmer} from 'use-immer';
 
-type SetFeatures = (recipe: FeatureCollection | ((draft: Draft<FeatureCollection>) => void), userChange?: boolean) => void;
+type SetFeatures = (
+  recipe: FeatureCollection | ((draft: Draft<FeatureCollection>) => void),
+  userChange?: boolean,
+) => void;
 
 interface MapContextType {
   id: string;
@@ -20,6 +23,10 @@ interface MapContextType {
   trashEnabled: boolean;
   setTrashEnabled: Dispatch<SetStateAction<boolean>>;
   hasUnsavedChanges: boolean;
+  canUndo: boolean;
+  canRedo: boolean;
+  undo: () => FeatureCollection | null;
+  redo: () => FeatureCollection | null;
 }
 
 interface SplitPolygonWorkflow {
@@ -28,6 +35,8 @@ interface SplitPolygonWorkflow {
 }
 
 type Workflow = SplitPolygonWorkflow;
+
+const MAX_HISTORY_STEPS = 10;
 
 export const MapContext = createContext<MapContextType | undefined>(undefined);
 
@@ -39,14 +48,53 @@ export const MapContextProvider = ({id, children}: {id: string; children: React.
   const [drawWorkflow, setDrawWorkflow] = useImmer<Workflow | null>(null);
   const [trashEnabled, setTrashEnabled] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [past, setPast] = useState<FeatureCollection[]>([]);
+  const [future, setFuture] = useState<FeatureCollection[]>([]);
+
+  // Keep a ref to the current features so undo/redo callbacks don't go stale.
+  const featuresRef = useRef(features);
+  featuresRef.current = features;
 
   const setFeatures = useCallback<SetFeatures>(
     (recipe, userChange = true) => {
+      if (userChange) {
+        setPast((prev) => [...prev, featuresRef.current].slice(-MAX_HISTORY_STEPS));
+        setFuture([]);
+      }
       setFeaturesImmer(recipe as Parameters<typeof setFeaturesImmer>[0]);
       setHasUnsavedChanges(userChange);
     },
     [setFeaturesImmer],
   );
+
+  const undo = useCallback((): FeatureCollection | null => {
+    const prev = past;
+    if (prev.length === 0) return null;
+    const snapshot = prev[prev.length - 1];
+    setPast(prev.slice(0, -1));
+    setFuture((f) => [featuresRef.current, ...f]);
+    setFeaturesImmer(snapshot);
+    setHasUnsavedChanges(prev.length > 1);
+    return snapshot;
+  }, [past, setFeaturesImmer]);
+
+  const redo = useCallback((): FeatureCollection | null => {
+    const prev = future;
+    if (prev.length === 0) return null;
+    const snapshot = prev[0];
+    setFuture(prev.slice(1));
+    setPast((p) => [...p, featuresRef.current].slice(-MAX_HISTORY_STEPS));
+    setFeaturesImmer(snapshot);
+    setHasUnsavedChanges(true);
+    return snapshot;
+  }, [future, setFeaturesImmer]);
+
+  useEffect(() => {
+    if (!editMode) {
+      setPast([]);
+      setFuture([]);
+    }
+  }, [editMode]);
 
   return (
     <MapContext
@@ -63,6 +111,10 @@ export const MapContextProvider = ({id, children}: {id: string; children: React.
         trashEnabled,
         setTrashEnabled,
         hasUnsavedChanges,
+        canUndo: past.length > 0,
+        canRedo: future.length > 0,
+        undo,
+        redo,
       }}
     >
       {children}
