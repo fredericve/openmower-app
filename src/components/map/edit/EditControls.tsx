@@ -99,7 +99,8 @@ export default function EditControls({
         position="top-left"
         icon={SaveIcon}
         title="Save"
-        style={{color: theme.palette.success.main}}
+        style={{color: hasUnsavedChanges ? theme.palette.success.main : undefined}}
+        disabled={!hasUnsavedChanges}
         onClick={handleSave}
       />
       <ControlButton
