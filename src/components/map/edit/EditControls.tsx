@@ -1,5 +1,4 @@
 import {useMapboxDraw, useMapContext, useMapSelection} from '@/contexts/MapContext';
-import {CancelConfirmDialog} from './CancelConfirmDialog';
 import theme from '@/theme';
 import type {AreaFeature} from '@/types/geojson';
 import {removeMiniCoords} from '@/utils/area-utils';
@@ -20,10 +19,11 @@ import {
   Trash2Icon,
   Undo2Icon,
 } from 'lucide-react';
-import {useCallback} from 'react';
+import {useCallback, useState} from 'react';
 import {useDialog} from 'react-dialog-async';
 import ControlButton from '../ControlButton';
 import {AreaSettingsDialog} from './AreaSettingsDialog';
+import {CancelConfirmDialog} from './CancelConfirmDialog';
 import MergeDialog from './MergeDialog';
 import SubtractDialog from './SubtractDialog';
 
@@ -34,7 +34,18 @@ export default function EditControls({
   areas: AreaFeature[];
   saveMapToMower: () => Promise<void>;
 }) {
-  const {setEditMode, trashEnabled, setFeatures, drawMode, setDrawWorkflow, hasUnsavedChanges, canUndo, canRedo, undo, redo} = useMapContext();
+  const {
+    setEditMode,
+    trashEnabled,
+    setFeatures,
+    drawMode,
+    setDrawWorkflow,
+    hasUnsavedChanges,
+    canUndo,
+    canRedo,
+    undo,
+    redo,
+  } = useMapContext();
   const draw = useMapboxDraw();
   const selectedIds = useMapSelection();
   const selectedAreas = areas.filter((area) => selectedIds.includes(area.id as string));
@@ -44,9 +55,16 @@ export default function EditControls({
   const subtractDialog = useDialog(SubtractDialog);
   const cancelConfirmDialog = useDialog(CancelConfirmDialog);
 
+  const [isSaving, setIsSaving] = useState(false);
+
   const handleSave = useCallback(async () => {
-    await saveMapToMower();
-    setEditMode(false);
+    setIsSaving(true);
+    try {
+      await saveMapToMower();
+      setEditMode(false);
+    } finally {
+      setIsSaving(false);
+    }
   }, [saveMapToMower, setEditMode]);
 
   const handleCancel = useCallback(async () => {
@@ -94,6 +112,17 @@ export default function EditControls({
     setDrawWorkflow({type: 'split_polygon', areaId: selectedIds[0]});
     draw?.changeMode(MapboxDraw.constants.modes.DRAW_LINE_STRING);
   }, [setDrawWorkflow, selectedIds, draw]);
+
+  if (isSaving) {
+    return (
+      <ControlButton
+        position="top-left"
+        icon={() => <SaveIcon style={{animation: 'pulse 1.5s ease-in-out infinite'}} />}
+        title="Saving…"
+        disabled
+      />
+    );
+  }
 
   return (
     <>
