@@ -6,3 +6,4 @@ Dockerfile
 node_modules
 .next
 README.md
+config.json
