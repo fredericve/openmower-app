@@ -2,6 +2,7 @@ const green = '#4caf50';
 const orange = '#fbb03b';
 const white = '#dddddd';
 const black = '#000000';
+const gray = '#888888';
 
 // prettier-ignore
 const type_color = [
@@ -36,8 +37,15 @@ export const drawStyles = [
       'line-join': 'round',
     },
     paint: {
-      'line-color': ['case', ['==', ['get', 'active'], 'true'], orange, green],
-      // 'line-dasharray': ['case', ['==', ['get', 'active'], 'true'], [0.2, 2], [2, 0]],
+      'line-color': [
+        'case',
+        ['==', ['get', 'active'], 'true'],
+        orange,
+        ['==', ['get', 'user_active'], false],
+        gray,
+        green,
+      ],
+      'line-dasharray': ['case', ['==', ['get', 'user_active'], false], ['literal', [3, 3]], ['literal', [1, 0]]],
       'line-width': 1,
     },
   },
