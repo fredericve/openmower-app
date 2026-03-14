@@ -3,6 +3,7 @@
 import {HeaderStat, Page, PageContent, PageHeader} from '@/components/page';
 import {outerCardStyles} from '@/lib/cardStyles';
 import {useMowers} from '@/stores/mowersStore';
+import {useRouter} from 'next/navigation';
 import {
   Battery90 as BatteryIcon,
   CheckCircle as CheckIcon,
@@ -17,7 +18,7 @@ import {
   Warning as WarningIcon,
 } from '@mui/icons-material';
 import {Avatar, Box, Button, Card, CardContent, Chip, LinearProgress, Paper, Typography, useTheme} from '@mui/material';
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 
 // Mock status data - in real app this would come from MQTT
 const mockStatusData = {
@@ -44,6 +45,15 @@ const mockStatusData = {
 };
 
 export default function Dashboard() {
+  const isDev = process.env.NEXT_PUBLIC_IS_DEV === 'true';
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isDev) router.replace('/map');
+  }, [isDev, router]);
+
+  if (!isDev) return null;
+
   const theme = useTheme();
   const mowers = useMowers();
   const [isProcessing, setIsProcessing] = useState(false);
