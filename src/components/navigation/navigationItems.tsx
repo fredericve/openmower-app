@@ -4,17 +4,18 @@ import {
   Dashboard as DashboardIcon,
   Map as MapIcon,
   Sensors as SensorIcon,
-  Assignment as TaskIcon,
   Settings as SettingsIcon,
+  Assignment as TaskIcon,
 } from '@mui/icons-material';
 
 export function createNavigationItems(): NavigationItem[] {
+  const isDev = process.env.NEXT_PUBLIC_IS_DEV === 'true';
   return [
-    {label: 'Dashboard', icon: <DashboardIcon />, path: '/', isGlobal: true},
+    isDev && {label: 'Dashboard', icon: <DashboardIcon />, path: '/', isGlobal: true},
     {label: 'Map', icon: <MapIcon />, path: '/map', isGlobal: false},
-    {label: 'Tasks', icon: <TaskIcon />, path: '/tasks', isGlobal: false},
-    {label: 'Sensors', icon: <SensorIcon />, path: '/sensors', isGlobal: false},
-    {label: 'Settings', icon: <SettingsIcon />, path: '/settings', isGlobal: true},
+    isDev && {label: 'Tasks', icon: <TaskIcon />, path: '/tasks', isGlobal: false},
+    isDev && {label: 'Sensors', icon: <SensorIcon />, path: '/sensors', isGlobal: false},
+    isDev && {label: 'Settings', icon: <SettingsIcon />, path: '/settings', isGlobal: true},
     {label: 'Debug', icon: <BugReportIcon />, path: '/debug', isGlobal: true},
-  ];
+  ].filter((item): item is NavigationItem => !!item);
 }
