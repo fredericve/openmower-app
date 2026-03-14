@@ -1,4 +1,4 @@
-import type {Area, AreaProps, MapData} from '@/stores/schemas';
+import {fallbackDatum, type Area, type AreaProps, type MapData} from '@/stores/schemas';
 import type {AreaFeature} from '@/types/geojson';
 import {
   datumToRelative,
@@ -59,16 +59,15 @@ function pointToFeature(type: string, point: RelativePoint, datum: UtmPoint): Fe
   };
 }
 
-function convertDatum(map: MapData) {
-  const {lat, long} = map.datum!;
-  return datumToRelative([long, lat]);
+function convertDatum(datum: {lat: number; long: number}) {
+  return datumToRelative([datum.long, datum.lat]);
 }
 
 export function mapToFeatures(map?: MapData): FeatureCollection {
-  if (!map || !map.datum) {
+  if (!map) {
     return {type: 'FeatureCollection', features: []};
   }
-  const datum = convertDatum(map);
+  const datum = convertDatum(map.datum ?? fallbackDatum);
   return {
     type: 'FeatureCollection',
     features: [
@@ -79,7 +78,7 @@ export function mapToFeatures(map?: MapData): FeatureCollection {
 }
 
 export function featuresToMap(map: MapData, features: FeatureCollection) {
-  const datum = convertDatum(map);
+  const datum = convertDatum(map.datum ?? fallbackDatum);
   return produce(map, (draft) => {
     draft.areas = features.features
       .filter((feature) => feature.geometry.type === 'Polygon')

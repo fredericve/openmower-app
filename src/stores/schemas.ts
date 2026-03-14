@@ -131,6 +131,8 @@ export const mapDefaults: MapData = {
   docking_stations: [],
 };
 
+export const fallbackDatum = {lat: 48.0, long: 11.0, height: 0} satisfies MapData['datum'];
+
 export const stateDefaults: State = {
   battery_percentage: 100,
   current_action_progress: 0.0,

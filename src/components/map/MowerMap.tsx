@@ -1,7 +1,7 @@
 'use client';
 
 import {useMapboxDraw, useMapContext} from '@/contexts/MapContext';
-import {MapData, type AreaProps} from '@/stores/schemas';
+import {fallbackDatum, MapData, type AreaProps} from '@/stores/schemas';
 import type {AreaFeature} from '@/types/geojson';
 import {generateId, splitPolygonWithLine} from '@/utils/area-utils';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
@@ -65,7 +65,7 @@ export function MowerMap({mapData, saveMapToMower, sx}: MowerMapProps) {
     if (features.features.length > 0) {
       bounds.current = bbox(features) as BBox;
     } else {
-      const {long, lat} = mapData.datum ?? {lat: 48.0, long: 11.0};
+      const {long, lat} = mapData.datum ?? fallbackDatum;
       bounds.current = [long, lat, long, lat] as BBox;
     }
     // If the bounds have changed, fit to bounds (except in edit mode).
