@@ -2,13 +2,16 @@
 
 import {AppConfig} from '@/components/types';
 import {promises as fs} from 'fs';
+import {headers} from 'next/headers';
 import path from 'path';
 
 const configPath = path.join(process.cwd(), 'config.json');
 
-function loadConfigFromEnv(): AppConfig | null {
-  const name = process.env.MOWER_NAME;
-  const mqtt_ws_url = process.env.MOWER_MQTT_WS_URL;
+async function loadConfigFromEnv(): Promise<AppConfig | null> {
+  const name = process.env.MOWER_NAME ?? 'OpenMower';
+  const host = (await headers()).get('host') ?? 'localhost';
+  const hostname = host.split(':')[0];
+  const mqtt_ws_url = process.env.MOWER_MQTT_WS_URL ?? `ws://${hostname}:1883`;
   const mqtt_prefix = process.env.MOWER_MQTT_PREFIX ?? '';
 
   if (!name || !mqtt_ws_url) return null;
@@ -27,7 +30,7 @@ function loadConfigFromEnv(): AppConfig | null {
 }
 
 export async function loadAppConfig(): Promise<AppConfig> {
-  const envConfig = loadConfigFromEnv();
+  const envConfig = await loadConfigFromEnv();
   if (envConfig) return envConfig;
 
   try {
