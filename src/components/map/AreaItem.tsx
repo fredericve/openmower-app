@@ -5,7 +5,14 @@ import type {DraggableSyntheticListeners} from '@dnd-kit/core';
 import {Box, ListItem, Typography} from '@mui/material';
 import {area as turfArea} from '@turf/area';
 import {Feature, Polygon} from 'geojson';
-import {MenuIcon} from 'lucide-react';
+import {CircleSlashIcon, MenuIcon, RouteIcon, ScissorsIcon, SquareDashedIcon, type LucideIcon} from 'lucide-react';
+
+const TYPE_CONFIG: Record<AreaProps['type'], {icon: LucideIcon; color: string; strokeWidth: number}> = {
+  mow: {icon: ScissorsIcon, color: '#4caf50', strokeWidth: 3},
+  nav: {icon: RouteIcon, color: '#42a5f5', strokeWidth: 2},
+  obstacle: {icon: CircleSlashIcon, color: '#78909c', strokeWidth: 1.5},
+  draft: {icon: SquareDashedIcon, color: '#9e9e9e', strokeWidth: 2},
+};
 
 export interface AreaItemProps {
   area: Feature<Polygon, AreaProps>;
@@ -31,6 +38,7 @@ export default function AreaItem({
   ...props
 }: AreaItemProps & SortableItemProps) {
   const inactive = area.properties.active === false;
+  const {icon: Icon, color, strokeWidth} = TYPE_CONFIG[area.properties.type ?? 'draft'];
   return (
     <ListItem
       style={style}
@@ -54,7 +62,10 @@ export default function AreaItem({
       }}
     >
       <Box sx={{width: '100%', display: 'flex'}}>
-        <Box sx={{flex: 1, px: 2, py: 1, opacity: dragging ? 0.4 : 1.0}}>
+        <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'center', pl: 2, color}}>
+          <Icon size={18} strokeWidth={strokeWidth} />
+        </Box>
+        <Box sx={{flex: 1, px: 1.5, py: 1, opacity: dragging ? 0.4 : 1.0}}>
           <Typography variant="h6" fontWeight="600">
             {area.properties.name ?? 'Unnamed area'}
           </Typography>
