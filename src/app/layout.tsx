@@ -1,7 +1,5 @@
 import {loadAppConfig} from '@/lib/actions';
 import {Box} from '@mui/material';
-
-export const dynamic = 'force-dynamic';
 import {AppRouterCacheProvider} from '@mui/material-nextjs/v15-appRouter';
 import {ThemeProvider} from '@mui/material/styles';
 import type {Metadata} from 'next';
@@ -12,6 +10,8 @@ import Navigation from '../components/navigation/Navigation';
 import theme from '../theme';
 import './globals.css';
 
+export const dynamic = 'force-dynamic';
+
 const roboto = Roboto({
   weight: ['300', '400', '500', '700'],
   subsets: ['latin'],
@@ -20,8 +20,8 @@ const roboto = Roboto({
 });
 
 export const metadata: Metadata = {
-  title: 'LawnBot Control',
-  description: 'Control and monitor your robotic lawnmowers',
+  title: 'OpenMower App',
+  description: 'Control and monitor your OpenMower robotic lawnmower',
 };
 
 export default async function RootLayout({
