@@ -36,6 +36,7 @@
     "@turf/union": "^7.3.4",
     "@types/json-schema-merge-allof": "^0.6.5",
     "@types/mapbox__mapbox-gl-draw": "^1.4.9",
+    "geodesy": "^2.4.0",
     "immer": "^11.1.4",
     "json-schema-merge-allof": "^0.8.1",
     "lodash.merge": "^4.6.2",
@@ -50,7 +51,6 @@
     "react-hook-form": "^7.71.2",
     "sweepline-intersections": "^2.0.1",
     "use-immer": "^0.11.0",
-    "utm": "^1.1.1",
     "yaml": "^2.8.2",
     "zod": "^4.3.6",
     "zustand": "^5.0.11"
@@ -59,6 +59,7 @@
     "@eslint/eslintrc": "^3",
     "@open-rpc/schema-utils-js": "^2.2.1",
     "@open-rpc/typings": "^1.13.1",
+    "@types/geodesy": "^2.2.8",
     "@types/geojson": "^7946.0.16",
     "@types/lodash.merge": "^4.6.9",
     "@types/node": "^25",

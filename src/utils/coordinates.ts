@@ -1,25 +1,25 @@
-import * as utm from 'utm';
+import {LatLon, default as Utm} from 'geodesy/utm.js';
 
 export type RelativePoint = {x: number; y: number};
 export type AbsolutePoint = [longitude: number, latitude: number];
-export type UtmPoint = ReturnType<typeof utm.fromLatLon>;
+export type UtmPoint = Utm;
 
 export function datumToRelative(absolute: AbsolutePoint): UtmPoint {
-  return utm.fromLatLon(absolute[1], absolute[0]);
+  return new LatLon(absolute[1], absolute[0]).toUtm();
 }
 
 export function pointToAbsolute(point: RelativePoint, datum: UtmPoint): AbsolutePoint {
-  const {latitude, longitude} = utm.toLatLon(
+  const {latitude, longitude} = new Utm(
+    datum.zone,
+    datum.hemisphere,
     datum.easting + point.x,
     datum.northing + point.y,
-    datum.zoneNum,
-    datum.zoneLetter,
-  );
+  ).toLatLon();
   return [longitude, latitude];
 }
 
 export function pointToRelative(point: AbsolutePoint, datum: UtmPoint): RelativePoint {
-  const utmPoint = utm.fromLatLon(point[1], point[0], datum.zoneNum);
+  const utmPoint = new LatLon(point[1], point[0]).toUtm(datum.zone);
   return {x: utmPoint.easting - datum.easting, y: utmPoint.northing - datum.northing};
 }
 
